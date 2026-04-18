@@ -9,21 +9,32 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+    public function up(): void {
+
         Schema::create('users', function (Blueprint $table) {
-            $table->id(); 
+            $table->id();
+
+            // Kolom umum (admin&mahasiswa)
             $table->string('username')->unique();
-            $table->string('nama_mahasiswa');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('nama_user');
+            $table->enum('role', ['mahasiswa', 'admin'])->default('mahasiswa');
+
+
+            // kolom khusu mahasiswa
             $table->string('nim')->unique()->nullable();
-            $table->string('jurusan')->nullable();
             $table->string('prodi')->nullable();
-            $table->integer('angkatan')->nullable();
-            $table->enum('role', ['mahasiswa', 'admin'])->default('mahasiswa'); // Pembeda akses
+            $table->string('jurusan')->nullable();
+            $table->string('angkatan')->nullable();
+            $table->string('no_hp')->nullable();
+
+            //kolom khusus admin(id admin)
+            $table->string('id_admin')->unique()->nullable();
+
             $table->rememberToken();
             $table->timestamps();
+
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -32,6 +43,7 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable();
         });
 
+
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
@@ -39,6 +51,7 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->longText('payload');
             $table->integer('last_activity')->index();
+            
         });
     }
 

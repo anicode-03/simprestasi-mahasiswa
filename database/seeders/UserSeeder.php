@@ -13,23 +13,25 @@ class UserSeeder extends Seeder
         // Akun Admin
         User::create([
             'username' => 'admin_simpresma',
-            'nama_mahasiswa' => 'Administrator',
+            'nama_user' => 'Administrator',
             'email' => 'admin@polije.ac.id',
-            'password' => Hash::make('password123'),
+            'password' => bcrypt('password123'),
             'role' => 'admin',
+            'id_admin' => 'AD001',
         ]);
 
         // Akun Mahasiswa 
         User::create([
-            'username' => 'mhs_tester',
-            'nama_mahasiswa' => 'Mahasiswa Contoh',
-            'email' => 'NIM@polije.ac.id',
-            'password' => Hash::make('E12345621'),
+            'username' => 'fikriyah',
+            'nama_user' => 'Fikriyah Imtyaz',
+            'email' => 'e41251122@student.polije.ac.id',
+            'password' => bcrypt('e41251122'),
             'role' => 'mahasiswa',
             'nim' => 'E41234567',
             'jurusan' => 'Teknologi Informasi',
             'prodi' => 'Teknik Informatika',
-            'angkatan' => 2024,
+            'angkatan' => 2025,
+            'no_hp' => '087872550004'
         ]);
     }
 }

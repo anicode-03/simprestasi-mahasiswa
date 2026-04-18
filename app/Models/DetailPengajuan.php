@@ -17,7 +17,7 @@ class DetailPengajuan extends Model
 
     // Detail merujuk ke data prestasi tertentu
     public function prestasi() {
-        return $this->belongTo(Prestasi::class, 'id_prestasi', 'id_prestasi');
+        return $this->belongTo(\App\Models\Prestasi::class, 'id_prestasi', 'id_prestasi');
     }
 
     // admin yang memverifikasi

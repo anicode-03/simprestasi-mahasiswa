@@ -17,6 +17,6 @@ class BuktiPrestasi extends Model
 
     // relasi ke prestasi
     public function prestasi() {
-        return $this->belongTo(Prestasi::class, 'id_prestasi', 'id_prestasi');
+        return $this->belongTo(\App\Models\Prestasi::class, 'id_prestasi', 'id_prestasi');
     }
 }

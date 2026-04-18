@@ -30,11 +30,11 @@ class Prestasi extends Model
     }
     // relasi ke tingkat
     public function tingkat() {
-        return $this->belongsTo(TingkatPrestasi::class, 'id_tingkat', 'id_tingkat');
+        return $this->belongsTo(\App\Models\TingkatPrestasi::class, 'id_tingkat', 'id_tingkat');
     }
 
     // relasi ke bukti
     public function bukti() {
-        return $this->hasMany(BuktiPrestasi::class, 'id_prestasi', 'id_prestasi');
+        return $this->hasMany(\App\Models\BuktiPrestasi::class, 'id_prestasi', 'id_prestasi');
     }
 }

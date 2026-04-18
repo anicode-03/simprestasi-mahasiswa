@@ -14,6 +14,6 @@ class TingkatPrestasi extends Model
     protected $fillable = ['id_tingkat', 'nama_tingkat'];
 
     public function prestasi() {
-        return $this->hasMany(Prestasi::class, 'id_tingkat', 'id_tingkat');
+        return $this->hasMany(\App\Models\Prestasi::class, 'id_tingkat', 'id_tingkat');
     }
 }

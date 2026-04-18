@@ -16,6 +16,6 @@ class Category extends Model
 
     // Satu kategori bisa punya banyak prestasi
     public function prestasi() {
-        return $this->hasMany(Prestasi::class, 'id_kategori', 'id_kategori');
+        return $this->hasMany(\App\Models\Prestasi::class, 'id_kategori', 'id_kategori');
     }
 }

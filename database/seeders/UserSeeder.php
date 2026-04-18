@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
             'username' => 'admin_simpresma',
             'nama_user' => 'Administrator',
             'email' => 'admin@polije.ac.id',
-            'password' => bcrypt('password123'),
+            'password' => Hash::make('password123'),
             'role' => 'admin',
             'id_admin' => 'AD001',
         ]);

@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DetailPengajuanPrestasi extends Model
 {
     use HasFactory;
 
-    protected $table = 'detail_pengajuan_prestasis';
+    protected $table = 'detail_pengajuan_prestasi';
     protected $primaryKey = 'id_detail';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = true;
+    protected $keyType = 'int';
+    public $timestamps = true;
 
     protected $fillable = [
         'id_detail',
@@ -23,14 +25,14 @@ class DetailPengajuanPrestasi extends Model
     ];
 
     // Relasi ke Prestasi
-    public function prestasi()
+    public function prestasi(): BelongsTo
     {
         return $this->belongsTo(Prestasi::class, 'id_prestasi', 'id_prestasi');
     }
 
     // Relasi ke Admin
-    public function admin()
+    public function admin(): BelongsTo
     {
-        return $this->belongsTo(Admin::class, 'id_admin', 'id_admin');
+        return $this->belongsTo(User::class, 'id_admin', 'id');
     }
 }

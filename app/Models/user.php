@@ -5,38 +5,64 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $table = 'users';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'int';
+    public $timestamps = true;
+
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'nim', 'prodi', 'jurusan', 'angkatan', 'no_hp'
+        'id',
+        'NIm',
+        'role',
+        'name',
+        'email',
+        'password',
+        'jurusan',
+        'prodi',
+        'angkatan',
+        'no_hp',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
 
-    protected function casts(): array
-    {
+    protected $hidden = [
+        'password',
+        'rememeber_token',
+    ];
+
+    protected function casts(): array {
         return [
-            'email_verified_at' => 'datetime',
+            'email_verivied_at' => 'datetime',
             'password' => 'hashed',
-            'angkatan' => 'integer',
         ];
     }
 
-    // Helper Role
-    public function isAdmin(): bool { return $this->role === 'admin'; }
-    public function isMahasiswa(): bool { return $this->role === 'mahasiswa'; }
 
-    // Relasi
-    public function prestasis()
-    {
-        return $this->hasMany(Prestasi::class, 'user_id'); // Mahasiswa yang mengajukan
+    //relasi user(mahasiswa) one to many
+    public function prestasi(): HasMany {
+        return $this->hasMany(Prestasi::class, 'NIM', 'NIM');
     }
 
-    public function reviewedPrestasis()
-    {
-        return $this->hasMany(DetailPengajuanPrestasi::class, 'reviewer_id'); // Admin yang review
+
+    //relasi use(admin) memverifikasi banyak detail pengajuan
+    public function detailPengajuan(): HasMany {
+        return $this->hasMany(DetailPengajuanPrestasi::class, 'id_admin', 'id');
+    }
+
+
+    // cek apakah user adalah admin
+    public function isAdmin(): bool {
+        return $this->role === 'admin';
+    }
+
+    // apakah user adalah mahasiswa
+    public function isMahasiswa(): bool {
+        return $this->role === 'mahasiswa';
     }
 }

@@ -14,7 +14,7 @@ class loginController extends Controller
 
     public function login(Request $request) {
         $credentials = $request->validate([
-            'username' => 'required',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
@@ -28,7 +28,7 @@ class loginController extends Controller
             }
             return redirect()->intended('/mahasiswa/dashboard');
         }
-        return back()->withErros(['username' => 'Username atau password salah']);    
+        return back()->withErrors(['username' => 'Username atau password salah']);    
     }
     public function logout(Request $request) {
         Auth::logout();

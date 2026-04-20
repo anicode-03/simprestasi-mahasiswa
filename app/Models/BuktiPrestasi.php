@@ -2,21 +2,23 @@
 
 namespace App\Models;
 
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BuktiPrestasi extends Model
 {
+    use HasFactory;
+
     protected $table = 'bukti_prestasi';
     protected $primaryKey = 'id_bukti';
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = [
-        'id_bukti', 'id_prestasi', 'dok_sertifikat', 'dok_kegiatan'
-    ];
+    protected $fillable = ['id_bukti', 'id_prestasi', 'dok_sertifikat', 'dok_kegiatan'];
 
     // relasi ke prestasi
     public function prestasi() {
-        return $this->belongTo(\App\Models\Prestasi::class, 'id_prestasi', 'id_prestasi');
+        return $this->belongsTo(Prestasi::class, 'id_prestasi', 'id_prestasi');
     }
 }

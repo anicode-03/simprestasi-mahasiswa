@@ -2,36 +2,48 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Akun Admin
+        // 1. ADMIN
         User::create([
-            'username' => 'admin_simpresma',
-            'nama_user' => 'Administrator',
-            'email' => 'admin@polije.ac.id',
-            'password' => Hash::make('password123'),
+            'name' => 'Falih Rahmatullah',
+            'email' => 'admin@polije.id',
+            'password' => Hash::make('123456'),
             'role' => 'admin',
-            'id_admin' => 'AD001',
+            'nim' => null, 'prodi' => null, 'jurusan' => null, 'angkatan' => null, 'no_hp' => '081234567890'
         ]);
 
-        // Akun Mahasiswa 
+        // 2. MAHASISWA 1
         User::create([
-            'username' => 'fikriyah',
-            'nama_user' => 'Fikriyah Imtyaz',
-            'email' => 'e41251122@student.polije.ac.id',
-            'password' => bcrypt('e41251122'),
+            'name' => 'Ani Rizqi Ziarotus S.',
+            'email' => 'e41251131@student.polije.ac.id',
+            'password' => Hash::make('123456'),
             'role' => 'mahasiswa',
-            'nim' => 'E41234567',
-            'jurusan' => 'Teknologi Informasi',
-            'prodi' => 'Teknik Informatika',
-            'angkatan' => 2025,
-            'no_hp' => '087872550004'
+            'nim' => 'E41251131', 'prodi' => 'TIF', 'jurusan' => 'TI', 'angkatan' => 2025, 'no_hp' => '081453765423'
+        ]);
+
+        // 3. MAHASISWA 2
+        User::create([
+            'name' => 'Fikriyah Imtyaz',
+            'email' => 'e41251122@student.polije.ac.id',
+            'password' => Hash::make('123456'),
+            'role' => 'mahasiswa',
+            'nim' => 'E41251122', 'prodi' => 'TIF', 'jurusan' => 'TI', 'angkatan' => 2025, 'no_hp' => '081453786564'
+        ]);
+
+        // 4. MAHASISWA 3
+        User::create([
+            'name' => 'Erix Agung Wibowo',
+            'email' => 'e41251146@student.polije.ac.id',
+            'password' => Hash::make('123456'),
+            'role' => 'mahasiswa',
+            'nim' => 'E41251146', 'prodi' => 'TIF', 'jurusan' => 'TI', 'angkatan' => 2025, 'no_hp' => '081436759876'
         ]);
     }
 }

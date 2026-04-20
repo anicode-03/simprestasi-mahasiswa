@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TingkatPrestasi extends Model
 {
+    use HasFactory;
+
     protected $table = 'tingkat_prestasi';
     protected $primaryKey = 'id_tingkat';
     public $incrementing = false;
@@ -13,7 +17,9 @@ class TingkatPrestasi extends Model
 
     protected $fillable = ['id_tingkat', 'nama_tingkat'];
 
+    // relasi ke prestasi 
     public function prestasi() {
-        return $this->hasMany(\App\Models\Prestasi::class, 'id_tingkat', 'id_tingkat');
+        return $this->hasMany(Prestasi::class, 'id_tingkat', 'id_tingkat');
     }
+
 }

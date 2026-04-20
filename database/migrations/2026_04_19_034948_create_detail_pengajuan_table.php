@@ -12,21 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('detail_pengajuan', function (Blueprint $table) {
-            $table->string('id_detail')->primary();
+            $table->string('id_detail', 20)->primary();
 
-
-            // relasi ke tabel prestasi
-            $table->string('id_prestasi');
-            $table->foreign('id_prestasi')->references('id_prestasi')->on('prestasi')->onDelete('cascade');
-
-
-            // relasi ke tabel user (role admin)
-            $table->foreignId('user_id')->constrained('users');
-
-
-            $table->string('status');
-            $table->text('catatan_admin')->nullable();
+            $table->foreignId('prestasi_id')->constrained('prestasis')->onDelete('cascade');
+            $table->foreignId('reviewer_id')->constrained('users')->onDelete('cascade');
             
+            $table->enum('status', ['Diajukan', 'Disetujui', 'Ditolak', 'Revisi'])->default('Diajukan');
+            $table->text('catatan_admin')->nullable();
             $table->timestamps();
         });
     }

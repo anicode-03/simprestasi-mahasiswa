@@ -21,11 +21,19 @@
                 @endauth
 
                 @guest
-                    <a href="{{ route('login') }}" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm transition">
-                        Login
+                <div class="flex gap-3">
+                    {{-- Login Admin --}}
+                    <a href="{{ route('admin.login') }}" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm transition">
+                        Login Admin
                     </a>
+                    
+                    {{-- Login Mahasiswa --}}
+                    <a href="{{ route('mahasiswa.login') }}" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm transition">
+                        Login Mahasiswa
+                    </a>
+                </div>
                 @endguest
-            </div>
+                </div>
         </div>
     </nav>
 

@@ -12,11 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('prestasi', function (Blueprint $table) {
-            $table->string('id_prestasi', 20)->primary();
+            $table->id();
 
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
-            $table->foreignId('id_kategori')->constrained('kategoris')->onDelete('cascade');
-            $table->foreignId('id_tingkat')->constrained('tingkat_prestasis')->onDelete('cascade');
+            $table->string('id_prestasi', 20)->unique();
+
+            
+            $table->foreignId('users_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->string('id_kategori', 20);
+            $table->foreign('id_kategori')->references('id_kategori')->on('kategori')->onDelete('cascade');
+
+            $table->string('id_tingkat', 20);
+            $table->foreign('id_tingkat')->references('id_tingkat')->on('tingkat_prestasi')->onDelete('cascade');
 
             $table->string('nama_prestasi');
             $table->string('penyelenggara');

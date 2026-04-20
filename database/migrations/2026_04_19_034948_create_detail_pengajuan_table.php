@@ -14,7 +14,11 @@ return new class extends Migration
         Schema::create('detail_pengajuan', function (Blueprint $table) {
             $table->string('id_detail', 20)->primary();
 
-            $table->foreignId('prestasi_id')->constrained('prestasis')->onDelete('cascade');
+
+            $table->string('id_prestasi', 20);
+            $table->foreign('id_prestasi')->references('id_prestasi')->on('prestasi')->onDelete('cascade');
+
+
             $table->foreignId('reviewer_id')->constrained('users')->onDelete('cascade');
             
             $table->enum('status', ['Diajukan', 'Disetujui', 'Ditolak', 'Revisi'])->default('Diajukan');

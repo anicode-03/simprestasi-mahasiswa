@@ -2,39 +2,49 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\TingkatPrestasiController;
+use App\Http\Controllers\PrestasiController;
+use App\Http\Controllers\VerifikasiController;
 
-// Halaman Depan
+// route dasar
 Route::get('/', function () {
     return view('welcome');
 });
 
-// ==================== ADMIN ROUTES ====================
-Route::prefix('admin')->group(function () {
-    // GET: Tampilkan form login admin
-    Route::get('/login', [AuthController::class, 'showAdminLogin'])->name('admin.login');
-    
-    // POST: Proses login admin ⬅️ TAMBAHKAN INI
-    Route::post('/login', [AuthController::class, 'loginAdmin']);
-    
-    // Dashboard admin
+//route wajib login
+Route::middleware('auth')->group(function (){
+
+    //dashboard bawaan breeze
     Route::get('/dashboard', function () {
-        return "Halo Admin! Ini Dashboard.";
-    })->middleware('auth:admin');
+        return view('dashboard');
+    })->name('dashboard');
+
+
+
+    // route admin
+
+
+
+
+
+    //crud kategori
+    Route::resource('kategori', KategoriController::class);
+
+
+    //crud tingkat prestasi
+    Route::resource('tingkat_prestasi', TingkatPrestasiController::class);
+
+
+    //verifikasi pengajuan (admin only)
+    Route::get('/verifikasi', [VerifikasiController::class, 'index'])->name('verifikasi.index');
+    Route::patch('/verifikasi/{id}', [VerifikasiController::class, 'update'])->name('verifikasi.update');
+
+
+
+
+    //route mahasiswa
+    Route::resource('prestasi', PrestasiController::class);
 });
 
-// ==================== MAHASISWA ROUTES ====================
-Route::prefix('mahasiswa')->group(function () {
-    // GET: Tampilkan form login mahasiswa
-    Route::get('/login', [AuthController::class, 'showMahasiswaLogin'])->name('mahasiswa.login');
-    
-    // POST: Proses login mahasiswa ⬅️ TAMBAHKAN INI (PENTING!)
-    Route::post('/login', [AuthController::class, 'loginMahasiswa']);
-    
-    // Dashboard mahasiswa
-    Route::get('/dashboard', function () {
-        return "Halo Mahasiswa! Ini Dashboard.";
-    })->middleware('auth:mahasiswa');
-});
-
-// Logout (bisa untuk admin/mahasiswa)
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+require __DIR__.'/auth.php';

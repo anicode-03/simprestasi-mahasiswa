@@ -16,7 +16,7 @@ return new class extends Migration
             $table->enum('role', ['admin', 'mahasiswa'])->default('mahasiswa');
             
             // Field khusus mahasiswa (nullable untuk admin)
-            $table->string('nim')->unique()->nullable();
+            $table->string('NIM')->unique()->nullable();
             $table->string('prodi')->nullable();
             $table->string('jurusan')->nullable();
             $table->year('angkatan')->nullable();

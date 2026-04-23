@@ -19,7 +19,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'id',
-        'NIm',
+        'NIM',
         'role',
         'name',
         'email',
@@ -33,12 +33,12 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
-        'rememeber_token',
+        'remember_token',
     ];
 
     protected function casts(): array {
         return [
-            'email_verivied_at' => 'datetime',
+            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

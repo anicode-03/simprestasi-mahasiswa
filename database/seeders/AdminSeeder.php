@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Admin;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Seeder;
 
@@ -13,10 +13,13 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        Admin::insert([
-            ['id_admin' => 'AD12345', 'nama_admin' => 'Falih', 'username' => 'falih1234_', 'password' => Hash::make('123456'), 'email' => 'admin@polije.id'],
-            ['id_admin' => 'AD12346', 'nama_admin' => 'Admin 2', 'username' => 'admin2_', 'password' => Hash::make('123456'), 'email' => 'admin2@polije.id'], 
-            ['id_admin' => 'AD12347', 'nama_admin' => 'Admin 3', 'username' => 'admin3_', 'password' => Hash::make('123456'), 'email' => 'admin3@polije.id'], 
+        User::create([
+            'name' => 'Admin Simprestasi',
+            'email' => 'admin@polije.ac.id',
+            'password' => Hash::make('AdminSecure123!'),
+            'role' => 'admin',
         ]);
+
+        $this->command->info('Admin berhasil dibuat!');
     }
 }

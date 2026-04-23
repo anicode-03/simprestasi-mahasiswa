@@ -18,6 +18,7 @@ class PrestasiController extends Controller
 
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         
         //jika admin, melihat semua, jika mahasiswa hanya miliknya
@@ -108,8 +109,14 @@ class PrestasiController extends Controller
      */
     public function show(Prestasi $prestasi)
     {
-        $this->authorizeView($prestasi);
-        $prestasi->load(['kategori', 'buktiPrestasi', 'detailPengajuan.admin']);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->isMahasiswa() && $prestasi->NIM !== $user->NIM) {
+            abort(403, 'Anda tidak berhak mengakses data ini');
+        }
+        $prestasi->load(['kategori', 'tingkatPrestasi', 'buktiPrestasi', 'detailPengajuan.admin']);
+
+        return view('prestasi.show', compact('prestasi'));
     }
 
     /**
@@ -117,7 +124,11 @@ class PrestasiController extends Controller
      */
     public function edit(Prestasi $prestasi)
     {
-        $this->authorizeView($prestasi);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->isMahasiswa() && $prestasi->NIM !== $user->NIM) {
+            abort(403, 'Anda tidak berhak mengakses data ini.');
+        }
         $kategori = Kategori::all();
         $tingkat = TingkatPrestasi::all();
         return view('prestasi.edit', compact('prestasi', 'kategori', 'tingkat'));
@@ -128,7 +139,11 @@ class PrestasiController extends Controller
      */
     public function update(Request $request, Prestasi $prestasi)
     {
-        $this->authorizeView($prestasi);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->isMahasiswa() && $prestasi->NIM !== $user->NIM) {
+            abort(403, 'Anda tidak berhak mengakses data ini.');
+        }
 
         $validated = $request->validate([
             'id_kategori'   => 'required|exists:kategori,id_kategori',
@@ -146,8 +161,8 @@ class PrestasiController extends Controller
         $prestasi->update($validated);
 
         //update file jika upload ulang
-        $bukti = $prestasi->BuktiPrestasi->first();
-        if ($prestasi->hasFile('dok_sertifikat')) {
+        $bukti = $prestasi->buktiPrestasi->first();
+        if ($request->hasFile('dok_sertifikat')) {
             $bukti->dok_sertifikat = $request->file('dok_sertifikat')->store('public/bukti_prestasi');
         }
         if ($request->hasFile('dok_kegiatan')) {
@@ -172,19 +187,24 @@ class PrestasiController extends Controller
      */
     public function destroy(Prestasi $prestasi)
     {
-        $this->authorizeView($prestasi);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->isMahasiswa() && $prestasi->NiM !== $user->NIM) {
+            abort(403, 'Anda tidak berhak mengakses data ini');
+        }
         $prestasi->delete(); //aka hapus bukti & detail pengajuan
         return redirect()->route('prestasi.index')->with('success', 'Prestasi dihapus');
     }
 
     //helper sederhana untuk cek kepemilikan data
-    private function authorizeView(Prestasi $prestasi) {
+    private function authorizeView(Prestasi $prestasi): void {
         
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
             if ($user->isMahasiswa() && $prestasi->NIM !== $user->NIM) {
                 abort(403, 'Anda tidak berhak mengakses data ini');
             }
-        }
+    }
 }
 
             

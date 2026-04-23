@@ -23,7 +23,9 @@ Route::middleware('auth')->group(function (){
 
 
     // route admin
-
+    Route::get('/admin/dashboard', function (){
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
 
 
 
@@ -44,6 +46,10 @@ Route::middleware('auth')->group(function (){
 
 
     //route mahasiswa
+    Route::get('/mahasiswa/dashboard', function (){
+        return view('mahasiswa.dashboard');
+    })->name('mahasiswa.dashboard');
+    
     Route::resource('prestasi', PrestasiController::class);
 });
 

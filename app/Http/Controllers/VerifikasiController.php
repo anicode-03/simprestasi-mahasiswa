@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetailPengajuanPrestasi;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,8 +10,9 @@ class VerifikasiController extends Controller
 {
     public function index() {
 
-    //hanya admin yang akses
-    if (!Auth::user()->isAdmin()) {
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
+    if (!$user()->isAdmin()) {
         abort(403, 'Hanya admin yang dapat mengakses halaman ini');
     }
 
@@ -26,8 +26,9 @@ class VerifikasiController extends Controller
 
     public function update(Request $request, $id) {
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        if ($user->isAdmin()) abort(403);
+        if (!$user->isAdmin()) abort(403);
 
         $validated = $request->validate([
             'status' => 'required|in:diterima,ditolak,revisi',

@@ -210,12 +210,12 @@
                         <div>
                             <label><i class="fas fa-user-circle mr-2"></i>Nama Lengkap</label>
                             <input type="text" name="name" value="{{ old('name') }}" class="input-field" placeholder="Nama Lengkap" required autofocus autocomplete="name">
-                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                            
                         </div>
                         <div>
                             <label><i class="fas fa-id-badge mr-2"></i>NIM Mahasiswa</label>
                             <input type="text" name="nim" value="{{ old('nim') }}" class="input-field" placeholder="E412xxxx" required>
-                            <x-input-error :messages="$errors->get('nim')" class="mt-2" />
+                            
                         </div>
                     </div>
 
@@ -223,7 +223,6 @@
                     <div>
                         <label><i class="fas fa-envelope-open mr-2"></i>Email SSO POLIJE</label>
                         <input type="email" name="email" value="{{ old('email') }}" class="input-field" placeholder="e412xxxx@student.polije.ac.id" required>
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 
                     <!-- Baris 3: Jurusan & Prodi -->
@@ -264,7 +263,7 @@
                     <div>
                         <label><i class="fas fa-phone-alt mr-2"></i>Nomor WhatsApp Aktif</label>
                         <input type="text" name="no_hp" value="{{ old('no_hp') }}" class="input-field" placeholder="08123xxxxxxx" required>
-                        <x-input-error :messages="$errors->get('no_hp')" class="mt-2" />
+                        
                     </div>
 
                     <!-- Baris 5: Password -->
@@ -272,12 +271,12 @@
                         <div>
                             <label><i class="fas fa-lock mr-2"></i>Kata Sandi</label>
                             <input type="password" name="password" class="input-field" placeholder="••••••••" required>
-                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                            
                         </div>
                         <div>
                             <label><i class="fas fa-shield-alt mr-2"></i>Konfirmasi</label>
                             <input type="password" name="password_confirmation" class="input-field" placeholder="••••••••" required>
-                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                            
                         </div>
                     </div>
 

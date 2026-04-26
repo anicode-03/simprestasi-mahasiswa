@@ -32,12 +32,17 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, 'ends_with:@student.polije.ac.id'
+            ],
             'nim' => ['required', 'string', 'max:20', 'unique:users,nim'],
             'jurusan' => ['required', 'string', 'max:100'],
             'prodi' => ['required', 'string', 'max:100'],
             'no_hp' => ['required', 'string', 'max:20'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'email.unique' => 'Email sudah terdaftar',
+            'email.ends_with' => 'Email harus menggunakan domain @student.polije.ac.id',
+            'nim.unique' => 'NIM sudah terdaftar',
         ]);
 
         // Ambil angkatan secara otomatis dari NIM (Contoh: E4121 -> 2021) 

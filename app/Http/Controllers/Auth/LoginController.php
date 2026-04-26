@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class loginController extends Controller
+class LoginController extends Controller
 {
     public function showLoginForm() {
         return view('auth.login');
@@ -14,8 +14,10 @@ class loginController extends Controller
 
     public function login(Request $request) {
         $credentials = $request->validate([
-            'email'    => 'required|email',
+            'email'    => 'required|email|ends_with:@student.polije.ac.id',
             'password' => 'required',
+        ], [
+            'email.ends_with' => 'Email harus menggunakan domain @student.polije.ac.id',
         ]);
 
 
@@ -28,12 +30,12 @@ class loginController extends Controller
             }
             return redirect()->intended('/mahasiswa/dashboard');
         }
-        return back()->withErrors(['username' => 'Username atau password salah']);    
+        return back()->withErrors(['email' => 'Email atau password salah']);    
     }
     public function logout(Request $request) {
         Auth::logout();
-        $request->sessions()->invalidate();
-        $request->sessions()->regenerateToken();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect('/login');
     }
 }

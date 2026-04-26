@@ -212,14 +212,28 @@
                     <p class="text-gray-500 font-medium">Silakan masukkan akun SSO Anda.</p>
                 </div>
 
+
+                @if ($errors->any())
+                   <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl shadow-sm">
+                       <div class="flex items-center mb-2">
+                           <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                           <span class="text-sm font-bold text-red-800">Ups! Terjadi kesalahan:</span>
+                       </div>
+                       <ul class="list-disc list-inside text-xs text-red-700 space-y-1 ml-1">
+                           @foreach ($errors->all() as $error)
+                               <li>{{ $error }}</li>
+                           @endforeach
+                       </ul>
+                   </div>
+                @endif
+                
                 <form id="loginForm" action="{{ route('login') }}" method= "POST">
                     @csrf
                     <div>
                         <label>Email Institusi</label>
                         <div class="input-group">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" id="email" required class="input-field" placeholder="e412xxxx@student.polije.ac.id" name="email" :value="old('email')" required autofocus autocomplete="username">
-                            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                            <input type="email" id="email" required class="input-field" placeholder="e412xxxx@student.polije.ac.id" name="email" value="{{ old('email') }}" required autofocus autocomplete="username">
                         </div>
                     </div>
 
@@ -228,7 +242,6 @@
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
                             <input type="password" id="password" required class="input-field" placeholder="••••••••••••" name="password" required autocomplete="current-password">
-                                <x-input-error :messages="$errors->get('password')" class="mt-2" />
                         </div>
                     </div>
 
@@ -237,6 +250,7 @@
                             <input type="checkbox" id="remember_me" class="w-4 h-4 rounded border-gray-300 text-blue-900 focus:ring-blue-900" name= "remember">
                             <label for="remember" class="ml-2 mb-0 text-xs font-semibold text-gray-500 cursor-pointer">{{ __('Remember me') }}</label>
                         </div>
+                        
                         @if (Route::has('password.request'))
                         <a href="{{ route('password.request') }}" class="text-xs font-bold text-blue-900 hover:underline">
                             {{ __('Lupa password?') }}
@@ -244,7 +258,7 @@
                         @endif
                     </div>
 
-                    <button type="submit" class="btn-primary" {{ __('Log in')}}>
+                    <button type="submit" class="btn-primary">
                         MASUK SEKARANG
                     </button>
                 </form>

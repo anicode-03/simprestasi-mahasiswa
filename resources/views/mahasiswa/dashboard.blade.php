@@ -420,7 +420,7 @@ $daftarPrestasi = [
         <!-- HEADER -->
         <header class="flex justify-between items-center -mt-3">
             <div>
-                <h1 id="header-title" class="text-2xl font-extrabold text-slate-800 tracking-tight">Selamat Datang, <span class="text-blue-700">Ani!</span></h1>
+                <h1 id="header-title" class="text-2xl font-extrabold text-slate-800 tracking-tight">Selamat Datang, <span class="text-blue-700">{{ Auth::user()->name }}!</span></h1>
                 <p id="header-subtitle" class="text-sm text-slate-500">Pantau terus perkembangan prestasimu hari ini.</p>
             </div>
 
@@ -429,7 +429,15 @@ $daftarPrestasi = [
                     <i class="fas fa-bell" aria-hidden="true"></i>
                     <span class="absolute top-3 right-2 w-2 h-2 bg-red-500 border-2 border-white rounded-full"></span>
                 </button>
-                <div class="h-10 w-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-700 font-bold border border-blue-200" title="Ani Rizqi Ziarotus S.">AZ</div>
+                <div class="h-10 w-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-700 font-bold border border-blue-200" title="{{ Auth::user()->name }}">
+                    @php
+                        $words = explode(' ', Auth::user()->name);
+                        $initials = count($words) >= 2 
+                            ? strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1)) 
+                            : strtoupper(substr($words[0], 0, 2));
+                    @endphp
+                    {{ $initials }}
+                </div>
             </div>
         </header>
 
@@ -441,18 +449,18 @@ $daftarPrestasi = [
                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ani" class="w-full h-full object-cover" alt="Foto profil Ani">
                     </div>
                     <div class="text-center w-full">
-                        <h2 class="text-2xl font-black text-slate-800 tracking-wide uppercase">Ani Rizqi Ziarotus S.</h2>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-wide uppercase">{{ Auth::user()->name }}</h2>
                         <div class="flex items-center justify-center gap-2 mt-2">
-                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 uppercase tracking-widest">E41251131</span>
+                            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 uppercase tracking-widest">{{ Auth::user()->nim }}</span>
                         </div>
                         <div class="grid grid-cols-2 gap-4 mt-8">
                             <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                 <span class="text-[10px] text-slate-400 font-bold uppercase block mb-1">Jurusan</span>
-                                <span class="text-sm font-bold text-slate-700">Teknologi Informasi</span>
+                                <span class="text-sm font-bold text-slate-700">{{ Auth::user()->jurusan }}</span>
                             </div>
                             <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                 <span class="text-[10px] text-slate-400 font-bold uppercase block mb-1">Prodi</span>
-                                <span class="text-sm font-bold text-slate-700">Teknik Informatika</span>
+                                <span class="text-sm font-bold text-slate-700">{{ Auth::user()->prodi }}</span>
                             </div>
                         </div>
                         <div class="mt-8 pt-8 border-t border-slate-100 flex items-center justify-center gap-3">

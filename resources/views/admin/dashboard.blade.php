@@ -135,7 +135,7 @@
     <main class="flex-1 flex flex-col bg-[#F8FAFC]">
         <header class="bg-white h-20 flex items-center justify-between px-10 border-b border-slate-200 shadow-sm z-10">
             <div class="flex items-center space-x-4">
-                <h2 id="pageTitle" class="text-2xl font-extrabold text-primary">Dashboard</h2>
+                <h2 id="pageTitle" class="text-2xl font-extrabold text-primary">{{ __('Dashboard Admin')}}</h2>
             </div>
             <div class="flex items-center space-x-6">
                 <div class="relative cursor-pointer" onclick="showToast('Tidak ada notifikasi baru.','info')">
@@ -144,8 +144,10 @@
                 </div>
                 <div class="flex items-center space-x-3 border-l pl-6">
                     <div class="text-right">
-                        <p class="text-xs font-extrabold text-slate-800">Administrator Utama</p>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase">SIMPRESMA Admin</p>
+                        <p class="text-xs font-extrabold text-slate-800">Halo, {{ Auth::user()->name }} (Admin)!</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">
+                            <strong>Email:</strong> {{ Auth::user()->email }}
+                        </p>
                     </div>
                     <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary border border-slate-200">
                         <i class="fas fa-user-shield"></i>

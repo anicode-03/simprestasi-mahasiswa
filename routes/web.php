@@ -21,7 +21,6 @@ Route::middleware('auth')->group(function () {
         if (Auth::user()->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
-
         return redirect()->route('mahasiswa.dashboard');
     })->name('dashboard');
 

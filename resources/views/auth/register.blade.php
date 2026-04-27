@@ -232,9 +232,9 @@
                             <div class="relative">
                                 <select name="jurusan" class="input-field appearance-none cursor-pointer pr-10" required>
                                     <option value="" disabled selected>Pilih Jurusan</option>
-                                    <option value="JTI">Teknologi Informasi</option>
-                                    <option value="JTP">Teknologi Pertanian</option>
-                                    <option value="JPM">Produksi Pertanian</option>
+                                    <option value="Teknologi Informasi">Teknologi Informasi</option>
+                                    <option value="Teknologi Pertanian">Teknologi Pertanian</option>
+                                    <option value="Produksi Pertanian">Produksi Pertanian</option>
                                 </select>
                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                     <i class="fas fa-chevron-down text-[10px]"></i>
@@ -247,9 +247,9 @@
                             <div class="relative">
                                 <select name="prodi" class="input-field appearance-none cursor-pointer pr-10" required>
                                     <option value="" disabled selected>Pilih Prodi</option>
-                                    <option value="TIF">Teknik Informatika</option>
-                                    <option value="MIF">Manajemen Informatika</option>
-                                    <option value="TKK">Teknik Komputer</option>
+                                    <option value="Teknik Informatika">Teknik Informatika</option>
+                                    <option value="Manajemen Informatika">Manajemen Informatika</option>
+                                    <option value="Teknik Komputer">Teknik Komputer</option>
                                 </select>
                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                     <i class="fas fa-chevron-down text-[10px]"></i>

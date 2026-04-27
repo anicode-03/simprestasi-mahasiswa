@@ -213,19 +213,19 @@
                 </div>
 
 
-                @if ($errors->any())
-                   <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl shadow-sm">
-                       <div class="flex items-center mb-2">
-                           <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-                           <span class="text-sm font-bold text-red-800">Ups! Terjadi kesalahan:</span>
-                       </div>
-                       <ul class="list-disc list-inside text-xs text-red-700 space-y-1 ml-1">
-                           @foreach ($errors->all() as $error)
-                               <li>{{ $error }}</li>
-                           @endforeach
-                       </ul>
-                   </div>
-                @endif
+                    @if ($errors->any())
+                    <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl shadow-sm">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                            <span class="text-sm font-bold text-red-800">Ups! Terjadi kesalahan:</span>
+                        </div>
+                        <ul class="list-disc list-inside text-xs text-red-700 space-y-1 ml-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
                 
                 <form id="loginForm" action="{{ route('login') }}" method= "POST">
                     @csrf

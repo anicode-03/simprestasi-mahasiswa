@@ -14,12 +14,9 @@ class LoginController extends Controller
 
     public function login(Request $request) {
         $credentials = $request->validate([
-            'email'    => 'required|email|ends_with:@student.polije.ac.id',
+            'email'    => 'required|email',
             'password' => 'required',
-        ], [
-            'email.ends_with' => 'Email harus menggunakan domain @student.polije.ac.id',
         ]);
-
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();

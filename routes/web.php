@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\KontakController;
 use App\Http\Controllers\TingkatPrestasiController;
 use App\Http\Controllers\PrestasiController;
 use App\Http\Controllers\VerifikasiController;
@@ -12,6 +13,9 @@ use App\Http\Controllers\VerifikasiController;
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
+Route::resource('kategori', KategoriController::class);
+Route::get('/kontak', [KontakController::class, 'index'])->name('kontak.index');
+
 
 //route wajib login
 Route::middleware('auth')->group(function () {
@@ -25,17 +29,16 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     // route admin
-    Route::get('/admin/dashboard', function (){
+    Route::get('/admin/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
     // Route khusus Mahasiswa
-    Route::get('/mahasiswa/dashboard', function (){
+    Route::get('/mahasiswa/dashboard', function () {
         return view('mahasiswa.dashboard'); // Pastikan file view ini ada
     })->name('mahasiswa.dashboard');
 
     //crud kategori
-    Route::resource('kategori', KategoriController::class);
 
     //crud tingkat prestasi
     Route::resource('tingkat_prestasi', TingkatPrestasiController::class);
@@ -47,4 +50,4 @@ Route::middleware('auth')->group(function () {
     Route::resource('prestasi', PrestasiController::class);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

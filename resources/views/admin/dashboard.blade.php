@@ -86,7 +86,7 @@
             <div class="flex items-center -ml-5 -mt-8">
                 <div class="p-2 rounded-xl -ml-1">
                     <div class="w-10 h-10 flex items-center justify-center">
-                        <img src="asset/img/logo.png" class="w-10 h-10 object-contain" alt="Polije Logo">
+                        <img src="{{ asset('assets/img/logo.png')}}" class="w-10 h-10 object-contain" alt="Polije Logo">
                     </div>
                 </div>
                 <div class="ml-1">

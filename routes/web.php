@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\KontakController;
 use App\Http\Controllers\TingkatPrestasiController;
 use App\Http\Controllers\PrestasiController;
@@ -14,7 +14,6 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 Route::resource('kategori', KategoriController::class);
-Route::get('/kontak', [KontakController::class, 'index'])->name('kontak.index');
 
 
 //route wajib login

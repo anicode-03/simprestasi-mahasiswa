@@ -10,7 +10,7 @@
                 <img src="{{ asset('assets/img/hero.png') }}" class="w-full max-w-xxl drop-shadow-2xl rounded-3xl" alt="Piala Prestasi">
             </div>
         </div>
- 
+
         <div class="md:w-1/2 text-white text-center md:text-left">
             <h1 class="text-4xl md:text-5xl font-regular leading-[1.15] mb-6">
                 Sistem Informasi Manajemen Prestasi Mahasiswa
@@ -19,7 +19,7 @@
                 Selamat datang di SIMPRESMA-POLIJE.<br>
                 Pangkalan Data Prestasi Mahasiswa Politeknik Negeri Jember.
             </p>
- 
+
             <div class="max-w-xl">
                 <p class="mb-3 text-sm font-semibold text-blue-200">Cek Portofolio Prestasi Kamu</p>
                 <div class="flex shadow-2xl">

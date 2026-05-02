@@ -29,6 +29,7 @@ class Prestasi extends Model
         'juara',
         'lokasi',
         'tgl_kegiatan',
+        'peringkat',
         'tgl_pengajuan',
         'deskripsi',
     ];

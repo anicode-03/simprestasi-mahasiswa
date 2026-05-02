@@ -42,6 +42,13 @@ Route::middleware('auth')->group(function () {
     //crud tingkat prestasi
     Route::resource('tingkat_prestasi', TingkatPrestasiController::class);
 
+
+    // // peringkat
+    // Route::get('/peringkat', function () {
+    //     return view('peringkat');
+    // })->name('peringkat');
+
+
     //verifikasi pengajuan (admin only)
     Route::get('/verifikasi', [VerifikasiController::class, 'index'])->name('verifikasi.index');
     Route::patch('/verifikasi/{id}', [VerifikasiController::class, 'update'])->name('verifikasi.update');

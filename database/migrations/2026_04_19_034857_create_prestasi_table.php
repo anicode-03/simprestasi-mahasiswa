@@ -16,7 +16,6 @@ return new class extends Migration
 
             $table->string('id_prestasi', 20)->unique();
 
-            
             $table->foreignId('users_id')->references('id')->on('users')->onDelete('cascade');
 
             $table->string('id_kategori', 20);
@@ -26,6 +25,7 @@ return new class extends Migration
             $table->foreign('id_tingkat')->references('id_tingkat')->on('tingkat_prestasi')->onDelete('cascade');
 
             $table->string('nama_prestasi');
+            $table->integer('peringkat');
             $table->string('penyelenggara');
             $table->string('lokasi');
             $table->date('tanggal_kegiatan');

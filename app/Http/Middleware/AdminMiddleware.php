@@ -9,10 +9,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, $role): Response
     {
-        if (!Auth::guard('admin')->check()) {
-            return redirect('/admin/login')->with('error', 'Silakan login sebagai admin');
+        // Hapus baris ini setelah tes berhasil:
+        // dd($request->user()->role, $role); 
+
+        if ($request->user()->role !== $role) {
+            return redirect('/')->with('error', 'Anda bukan admin');
         }
 
         return $next($request);

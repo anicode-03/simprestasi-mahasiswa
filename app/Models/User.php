@@ -6,63 +6,68 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne; // Tambahkan ini
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
     protected $table = 'users';
-    protected $primaryKey = 'id';
-    public $incrementing = true;
-    protected $keyType = 'int';
-    public $timestamps = true;
 
+    // id tidak perlu dimasukkan ke fillable karena auto-increment
     protected $fillable = [
-        'id',
-        'nim',
-        'role',
         'name',
         'email',
         'password',
-        'jurusan',
-        'prodi',
-        'angkatan',
-        'no_hp',
+        'role', // Penting untuk membedakan Admin/Mahasiswa
     ];
-
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    protected function casts(): array {
+    protected function casts(): array
+    {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
 
-
-    //relasi user(mahasiswa) one to many
-    public function prestasi(): HasMany {
-        return $this->hasMany(Prestasi::class, 'NIM', 'NIM');
+    /**
+     * 1. Relasi ke Profil Mahasiswa
+     * Karena data seperti NIM, Jurusan, Prodi ada di tabel terpisah 
+     */
+    public function mahasiswa(): HasOne
+    {
+        return $this->hasOne(Mahasiswa::class, 'user_id', 'id');
     }
 
-
-    //relasi use(admin) memverifikasi banyak detail pengajuan
-    public function detailPengajuan(): HasMany {
-        return $this->hasMany(DetailPengajuanPrestasi::class, 'id_admin', 'id');
+    public function prestasi()
+    {
+        return $this->hasManyThrough(
+            Prestasi::class,
+            Mahasiswa::class,
+            'user_id',
+            'mahasiswa_id',
+            'id',
+            'id'
+        );
     }
 
+    public function verifiedPrestasi(): HasMany
+    {
+        return $this->hasMany(Prestasi::class, 'verified_by', 'id');
+    }
 
-    // cek apakah user adalah admin
-    public function isAdmin(): bool {
+    public function isAdmin(): bool
+    {
         return $this->role === 'admin';
     }
 
-    // apakah user adalah mahasiswa
-    public function isMahasiswa(): bool {
+    public function isMahasiswa(): bool
+    {
         return $this->role === 'mahasiswa';
     }
 }

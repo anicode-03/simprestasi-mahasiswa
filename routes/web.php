@@ -1,53 +1,51 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\KontakController;
 use App\Http\Controllers\TingkatPrestasiController;
 use App\Http\Controllers\PrestasiController;
 use App\Http\Controllers\VerifikasiController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 
-// route dasar
+// ─── ROUTE DASAR ───
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
-Route::resource('kategori', KategoriController::class);
+
 Route::get('/kontak', [KontakController::class, 'index'])->name('kontak.index');
 
-
-//route wajib login
+// ─── ROUTE WAJIB LOGIN ───
 Route::middleware('auth')->group(function () {
 
-    //dashboard bawaan breeze
-    Route::get('/dashboard', function () {
-        if (Auth::user()->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-        return redirect()->route('mahasiswa.dashboard');
-    })->name('dashboard');
+    // Route Dashboard Tunggal (Fallback)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // route admin
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    // ─── GRUP ADMIN ───
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/verifikasi', [VerifikasiController::class, 'index'])->name('verifikasi.index');
+        Route::patch('/verifikasi/{id}', [VerifikasiController::class, 'update'])->name('verifikasi.update');
+    });
 
-    // Route khusus Mahasiswa
-    Route::get('/mahasiswa/dashboard', function () {
-        return view('mahasiswa.dashboard'); // Pastikan file view ini ada
-    })->name('mahasiswa.dashboard');
+    // ─── GRUP MAHASISWA ───
+    Route::middleware(['role:mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Route Profile diletakkan di sini (Hanya untuk Mahasiswa)
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    });
 
-    //crud kategori
-
-    //crud tingkat prestasi
+    // ─── RESOURCE ROUTES (Umum) ───
+    Route::resource('kategori', KategoriController::class);
     Route::resource('tingkat_prestasi', TingkatPrestasiController::class);
-
-    //verifikasi pengajuan (admin only)
-    Route::get('/verifikasi', [VerifikasiController::class, 'index'])->name('verifikasi.index');
-    Route::patch('/verifikasi/{id}', [VerifikasiController::class, 'update'])->name('verifikasi.update');
-
     Route::resource('prestasi', PrestasiController::class);
+
+    Route::post('/prestasi/{id}/approve', [PrestasiController::class, 'approve']);
+    Route::post('/prestasi/{id}/reject', [PrestasiController::class, 'reject']);
+    Route::post('/prestasi/{id}/revisi', [PrestasiController::class, 'revisi']);
 });
 
 require __DIR__ . '/auth.php';

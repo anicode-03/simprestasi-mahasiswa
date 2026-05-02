@@ -15,12 +15,12 @@ return new class extends Migration
             $table->string('id_detail', 20)->primary();
 
 
-            $table->string('id_prestasi', 20);
-            $table->foreign('id_prestasi')->references('id_prestasi')->on('prestasi')->onDelete('cascade');
+            $table->unsignedBigInteger('id_prestasi'); // Ganti dari string ke unsignedBigInteger
+            $table->foreign('id_prestasi')->references('id')->on('prestasi')->onDelete('cascade');
 
 
             $table->foreignId('reviewer_id')->constrained('users')->onDelete('cascade');
-            
+
             $table->enum('status', ['Diajukan', 'Disetujui', 'Ditolak', 'Revisi'])->default('Diajukan');
             $table->text('catatan_admin')->nullable();
             $table->timestamps();

@@ -4,207 +4,272 @@ namespace App\Http\Controllers;
 
 use App\Models\Prestasi;
 use App\Models\Kategori;
-use App\Models\TingkatPrestasi;
-use App\Models\DetailPengajuanPrestasi;
+use App\Models\Tingkat;
+use App\Models\Capaian;
 use App\Models\BuktiPrestasi;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PrestasiController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Tampilkan daftar prestasi
      */
-
     public function index()
     {
-        /** @var \App\Models\User $user */
         $user = Auth::user();
-        
-        //jika admin, melihat semua, jika mahasiswa hanya miliknya
-        $query = Prestasi::with(['kategori', 'tingkatPrestasi', 'detailPengajuan'])
-            ->latest('tgl_pengajuan');
 
+        $query = Prestasi::with([
+            'mahasiswa.user',
+            'kategori',
+            'tingkat',
+            'capaian',
+            'verifier'
+        ])->latest();
+
+        // mahasiswa hanya lihat miliknya
         if ($user->isMahasiswa()) {
-            $query->where('NIM', $user->NIM);
+            $query->where('mahasiswa_id', $user->mahasiswa->id);
         }
 
         $prestasi = $query->paginate(10);
+
         return view('prestasi.index', compact('prestasi'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Form tambah
      */
     public function create()
     {
-        $kategori = Kategori::all();
-        $tingkat = TingkatPrestasi::all();
-        return view('prestasi.create', compact('kategori', 'tingkat'));
+        return view('prestasi.create', [
+            'kategori' => Kategori::all(),
+            'tingkat'  => Tingkat::all(),
+            'capaian'  => Capaian::all(),
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Simpan data
      */
     public function store(Request $request)
     {
         $user = Auth::user();
 
-        $validated = $request->validate([
-            'id_kategori' => 'required|exists:kategori,id_kategori',
-            'id_tingkat'  => 'required|exists:tingkat_prestasi,id_tingkat',
-            'nama_prestasi' => 'required|string|max:255',
+        $request->validate([
+            'kategori_id' => 'required|exists:kategori,id',
+            'tingkat_id'  => 'required|exists:tingkat,id',
+            'capaian_id'  => 'required|exists:capaian,id',
+            'nama_kompetisi' => 'required|string|max:255',
             'penyelenggara' => 'required|string|max:255',
-            'juara'       => 'required|string|max:50',
-            'lokasi'      => 'required|string|max:255',
-            'tgl_kegiatan'=> 'required|date',
-            'deskripsi'   => 'nullable|string',
-            'dok_sertifikat' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'dok_kegiatan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'lokasi' => 'required|string|max:255',
+            'tanggal_pelaksanaan' => 'required|date',
+            'deskripsi' => 'nullable|string',
+            'bukti.*' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048'
         ]);
 
-
-        //simpan prestasi
+        // simpan prestasi
         $prestasi = Prestasi::create([
-            'NIM'           => $user->NIM,
-            'id_kategori'   => $validated['id_kategori'],
-            'id_tingkat'    => $validated['id_tingkat'],
-            'nama_prestasi' => $validated['nama_prestasi'],
-            'penyelenggara' => $validated['penyelenggara'],
-            'juara'         => $validated['juara'],
-            'lokasi'        => $validated['lokasi'],
-            'tgl_kegiatan'  => $validated['tgl_kegiatan'],
-            'tgl_pengajuan' => now(),
-            'deskripsi'     => $validated['deskripsi'] ?? null,
-            'id_admin'      => null,
+            'mahasiswa_id' => $user->mahasiswa->id,
+            'kategori_id'  => $request->kategori_id,
+            'tingkat_id'   => $request->tingkat_id,
+            'capaian_id'   => $request->capaian_id,
+            'nama_kompetisi' => $request->nama_kompetisi,
+            'penyelenggara'  => $request->penyelenggara,
+            'lokasi'         => $request->lokasi,
+            'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
+            'deskripsi' => $request->deskripsi,
+            'status' => 'pending',
         ]);
 
+        // upload bukti (bisa banyak file)
+        if ($request->hasFile('bukti')) {
+            foreach ($request->file('bukti') as $file) {
+                $path = $file->store('bukti', 'public');
 
-        // simpan file bukti
-        $pathSertifikat = $request->file('dok_sertifikat')->store('public/bukti_prestasi');
-        $pathKegiatan = $request->hasFile('dok_kegiatan') ? $request->file('dok_kegiatan')->store('public/bukti_prestasi') : null;
-
-        BuktiPrestasi::create([
-            'id_prestasi'  =>  $prestasi->id_prestasi,
-            'dok_sertifikat' => $pathSertifikat,
-            'dok_kegiatan' => $pathKegiatan,
-        ]);
-
-
-
-        // status pending
-        DetailPengajuanPrestasi::create([
-            'id_prestasi'   => $prestasi->id_prestasi,
-            'id_admin'      => null,
-            'status'        => 'pending',
-            'catatan_admin' => null,
-        ]);
+                BuktiPrestasi::create([
+                    'prestasi_id' => $prestasi->id,
+                    'file_path'   => $path,
+                    'tipe_file'   => $file->getClientOriginalExtension(),
+                ]);
+            }
+        }
 
         return redirect()->route('prestasi.index')
-            ->with('success', 'Prestasi berhasil diajukan! Menunggu verifikasi admin');
+            ->with('success', 'Prestasi berhasil diajukan!');
     }
 
     /**
-     * Display the specified resource.
+     * Detail
      */
     public function show(Prestasi $prestasi)
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        if ($user->isMahasiswa() && $prestasi->NIM !== $user->NIM) {
-            abort(403, 'Anda tidak berhak mengakses data ini');
-        }
-        $prestasi->load(['kategori', 'tingkatPrestasi', 'buktiPrestasi', 'detailPengajuan.admin']);
+        $this->authorizeOwner($prestasi);
+
+        $prestasi->load([
+            'mahasiswa.user',
+            'kategori',
+            'tingkat',
+            'capaian',
+            'bukti',
+            'verifier'
+        ]);
 
         return view('prestasi.show', compact('prestasi'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Form edit
      */
     public function edit(Prestasi $prestasi)
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        if ($user->isMahasiswa() && $prestasi->NIM !== $user->NIM) {
-            abort(403, 'Anda tidak berhak mengakses data ini.');
-        }
-        $kategori = Kategori::all();
-        $tingkat = TingkatPrestasi::all();
-        return view('prestasi.edit', compact('prestasi', 'kategori', 'tingkat'));
+        $this->authorizeOwner($prestasi);
+
+        return view('prestasi.edit', [
+            'prestasi' => $prestasi,
+            'kategori' => Kategori::all(),
+            'tingkat'  => Tingkat::all(),
+            'capaian'  => Capaian::all(),
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update data
      */
     public function update(Request $request, Prestasi $prestasi)
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        if ($user->isMahasiswa() && $prestasi->NIM !== $user->NIM) {
-            abort(403, 'Anda tidak berhak mengakses data ini.');
-        }
+        $this->authorizeOwner($prestasi);
 
-        $validated = $request->validate([
-            'id_kategori'   => 'required|exists:kategori,id_kategori',
-            'id_tingkat'    => 'required|exists:tingkat_prestasi,id_tingkat',
-            'nama_prestasi' => 'required|string|max:255',
+        $request->validate([
+            'kategori_id' => 'required|exists:kategori,id',
+            'tingkat_id'  => 'required|exists:tingkat,id',
+            'capaian_id'  => 'required|exists:capaian,id',
+            'nama_kompetisi' => 'required|string|max:255',
             'penyelenggara' => 'required|string|max:255',
-            'juara'         => 'required|string|max:50',
-            'lokasi'        => 'required|string|max:255',
-            'tgl_kegiatan'  => 'required|date',
-            'deskripsi'     => 'nullable|string',
-            'dok_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'dok_kegiatan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'lokasi' => 'required|string|max:255',
+            'tanggal_pelaksanaan' => 'required|date',
+            'deskripsi' => 'nullable|string',
+            'bukti.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048'
         ]);
 
-        $prestasi->update($validated);
-
-        //update file jika upload ulang
-        $bukti = $prestasi->buktiPrestasi->first();
-        if ($request->hasFile('dok_sertifikat')) {
-            $bukti->dok_sertifikat = $request->file('dok_sertifikat')->store('public/bukti_prestasi');
-        }
-        if ($request->hasFile('dok_kegiatan')) {
-            $bukti->dok_kegiatan = $request->file('dok_kegiatan')->store('public/bukti_prestasi');
-        }
-
-        $bukti->save();
-
-        // reset status ke pending jika data diedit
-        $prestasi->detailPengajuan->first()->update([
-            'status' => 'pending',
-            'id_admin' => null,
-            'catatan_admin' => null
+        $prestasi->update([
+            'kategori_id' => $request->kategori_id,
+            'tingkat_id'  => $request->tingkat_id,
+            'capaian_id'  => $request->capaian_id,
+            'nama_kompetisi' => $request->nama_kompetisi,
+            'penyelenggara'  => $request->penyelenggara,
+            'lokasi'         => $request->lokasi,
+            'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
+            'deskripsi' => $request->deskripsi,
+            'status' => 'pending', // reset
+            'verified_by' => null,
+            'verified_at' => null
         ]);
+
+        // upload ulang file
+        if ($request->hasFile('bukti')) {
+            foreach ($prestasi->bukti as $bukti) {
+                Storage::disk('public')->delete($bukti->file_path);
+                $bukti->delete();
+            }
+
+            foreach ($request->file('bukti') as $file) {
+                $path = $file->store('bukti', 'public');
+
+                BuktiPrestasi::create([
+                    'prestasi_id' => $prestasi->id,
+                    'file_path'   => $path,
+                    'tipe_file'   => $file->getClientOriginalExtension(),
+                ]);
+            }
+        }
 
         return redirect()->route('prestasi.index')
-            ->with('success', 'Data berhasil diperbarui');
+            ->with('success', 'Prestasi berhasil diperbarui');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Hapus
      */
     public function destroy(Prestasi $prestasi)
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        if ($user->isMahasiswa() && $prestasi->NiM !== $user->NIM) {
-            abort(403, 'Anda tidak berhak mengakses data ini');
+        $this->authorizeOwner($prestasi);
+
+        foreach ($prestasi->bukti as $bukti) {
+            Storage::disk('public')->delete($bukti->file_path);
         }
-        $prestasi->delete(); //aka hapus bukti & detail pengajuan
-        return redirect()->route('prestasi.index')->with('success', 'Prestasi dihapus');
+
+        $prestasi->delete();
+
+        return redirect()->route('prestasi.index')
+            ->with('success', 'Prestasi berhasil dihapus');
     }
 
-    //helper sederhana untuk cek kepemilikan data
-    private function authorizeView(Prestasi $prestasi): void {
-        
-        /** @var \App\Models\User $user */
+    /**
+     * Approve admin
+     */
+    public function approve($id)
+    {
+        $prestasi = Prestasi::findOrFail($id);
+
+        $prestasi->update([
+            'status' => 'disetujui',
+            'verified_by' => Auth::id(),
+            'verified_at' => now()
+        ]);
+
+        return back()->with('success', 'Prestasi disetujui');
+    }
+
+    /**
+     * Reject admin
+     */
+    public function reject(Request $request, $id)
+    {
+        $request->validate([
+            'catatan_admin' => 'required|string|max:500'
+        ]);
+
+        $prestasi = Prestasi::findOrFail($id);
+
+        $prestasi->update([
+            'status' => 'ditolak',
+            'catatan_admin' => $request->catatan_admin,
+            'verified_by' => Auth::id(),
+            'verified_at' => now()
+        ]);
+
+        return back()->with('success', 'Prestasi ditolak');
+    }
+
+    public function revisi(Request $request, $id)
+    {
+        $prestasi = Prestasi::findOrFail($id);
+
+        $request->validate([
+            'catatan_admin' => 'required|string'
+        ]);
+
+        $prestasi->update([
+            'status' => 'revisi',
+            'catatan_admin' => $request->catatan_admin,
+            'verified_by' => Auth::id(),
+            'verified_at' => now()
+        ]);
+
+        return back()->with('success', 'Prestasi diminta revisi');
+    }
+
+    /**
+     * Cek kepemilikan data
+     */
+    private function authorizeOwner(Prestasi $prestasi)
+    {
         $user = Auth::user();
-            if ($user->isMahasiswa() && $prestasi->NIM !== $user->NIM) {
-                abort(403, 'Anda tidak berhak mengakses data ini');
-            }
+
+        if ($user->isMahasiswa() && $prestasi->mahasiswa_id !== $user->mahasiswa->id) {
+            abort(403, 'Tidak punya akses');
+        }
     }
 }
-
-            

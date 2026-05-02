@@ -9,13 +9,11 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('bukti_prestasi', function (Blueprint $table) {
+        Schema::create('kategoris', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('prestasi_id')->constrained('prestasi')->cascadeOnDelete();
-            $table->string('file_path');
-            $table->enum('tipe_file', ['sertifikat', 'foto']);
+            $table->string('nama_kategori');
             $table->timestamps();
         });
     }
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bukti_prestasi');
+        Schema::dropIfExists('kategori');
     }
 };

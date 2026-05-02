@@ -9,28 +9,26 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+    // database/migrations/xxxx_create_prestasis_table.php
     public function up(): void
     {
         Schema::create('prestasi', function (Blueprint $table) {
             $table->id();
 
-            $table->string('id_prestasi', 20)->unique();
+            $table->foreignId('mahasiswa_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('kategori_id')->constrained();
+            $table->foreignId('tingkat_id')->constrained();
+            $table->foreignId('capaian_id')->constrained('capaians');
 
-            
-            $table->foreignId('users_id')->references('id')->on('users')->onDelete('cascade');
-
-            $table->string('id_kategori', 20);
-            $table->foreign('id_kategori')->references('id_kategori')->on('kategori')->onDelete('cascade');
-
-            $table->string('id_tingkat', 20);
-            $table->foreign('id_tingkat')->references('id_tingkat')->on('tingkat_prestasi')->onDelete('cascade');
-
-            $table->string('nama_prestasi');
+            $table->string('nama_kompetisi');
             $table->string('penyelenggara');
-            $table->string('lokasi');
-            $table->date('tanggal_kegiatan');
-            $table->text('deskripsi')->nullable();
-            
+
+            $table->enum('status', ['pending', 'disetujui', 'ditolak', 'revisi'])->default('pending');
+            $table->text('catatan_admin')->nullable();
+
+            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('verified_at')->nullable();
+
             $table->timestamps();
         });
     }

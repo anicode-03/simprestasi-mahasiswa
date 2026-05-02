@@ -35,6 +35,22 @@
         <p class="text-gray-500 font-medium">Silakan masukkan akun SSO Anda.</p>
     </div>
 
+    {{-- Pesan Sukses Setelah Registrasi --}}
+    @if (session('success'))
+        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-xl shadow-sm flex items-center">
+            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+            <span class="text-sm font-bold text-green-800">{{ session('success') }}</span>
+        </div>
+    @endif
+
+    {{-- Status Bawaan Breeze (Lupa Password, dll) --}}
+    @if (session('status'))
+        <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-xl shadow-sm flex items-center">
+            <i class="fas fa-info-circle text-blue-500 mr-3"></i>
+            <span class="text-sm font-bold text-blue-800">{{ session('status') }}</span>
+        </div>
+    @endif
+
     {{-- Pesan Error --}}
     @if ($errors->any())
         <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl shadow-sm">
@@ -56,34 +72,33 @@
 
         {{-- Email --}}
         <div>
-            <label>Email Institusi</label>
-            <div class="input-group">
-                <i class="fas fa-envelope"></i>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Email Institusi</label>
+            <div class="input-group relative">
+                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <input type="email"
                        name="email"
                        value="{{ old('email') }}"
-                       class="input-field"
+                       class="input-field pl-11 w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-900"
                        placeholder="e412xxxx@student.polije.ac.id"
                        required
                        autofocus>
             </div>
         </div>
 
-        {{-- Password --}}
-        <div>
-            <label>Kata Sandi</label>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
+        <div class="mt-4">
+            <label class="block text-sm font-bold text-gray-700 mb-1">Kata Sandi</label>
+            <div class="input-group relative">
+                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <input type="password"
                        name="password"
-                       class="input-field"
+                       class="input-field pl-11 w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-900"
                        placeholder="••••••••••••"
                        required>
             </div>
         </div>
 
         {{-- Remember Me & Lupa Password --}}
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center justify-between mt-4 mb-8">
             <div class="flex items-center">
                 <input type="checkbox"
                        id="remember_me"
@@ -102,7 +117,9 @@
             @endif
         </div>
 
-        <button type="submit" class="btn-primary">MASUK SEKARANG</button>
+        <button type="submit" class="btn-primary w-full py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-lg">
+            MASUK SEKARANG
+        </button>
     </form>
 
     <p class="text-center mt-10 text-sm text-gray-500 font-medium">

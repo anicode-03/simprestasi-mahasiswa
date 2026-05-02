@@ -198,10 +198,10 @@
 <body class="bg-gray-50 text-gray-800">
 
     @include('layouts.navbar')
-    @include('components.footer')
-    @include('components.popup')
-    @yield('content')
 
+    @yield('content')
+    @include('components.footer')
+    @include('components.popup')    
     <script src="{{ asset('assets/prestasi.js') }}"></script>
     {{-- <script src="{{ asset('assets/kategori.js') }}"></script> --}}
 

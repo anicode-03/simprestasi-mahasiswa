@@ -4,56 +4,44 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
-    public function edit(Request $request): View
+    public function update(Request $request): RedirectResponse
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
-    }
-
-    /**
-     * Update the user's profile information.
-     */
-    public function update(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
-        ]);
-
+        $user = auth()->user();
         
-        $user = Auth::user();
-        $user()->update($validated);
-        return redirect()->back()->with('success', 'Profil berhasil diperbarui');
-    }
-
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+        // 1. Validasi
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'no_hp' => 'nullable|string|max:15',
+            'alamat' => 'nullable|string',
+            'avatar' => 'nullable|string', // avatar_url di migration Anda
+            'new_password' => ['nullable', 'confirmed', Password::defaults()],
         ]);
 
-        $user = $request->user();
+        // 2. Update Tabel Users (Email)
+        $user->update([
+            'email' => $request->email,
+        ]);
 
-        Auth::logout();
+        // 3. Update Tabel Mahasiswas (no_hp, alamat, avatar_url)
+        // Kita gunakan updateOrCreate untuk jaga-jaga jika data di tabel mahasiswa belum ada
+        $user->mahasiswa()->update([
+            'no_hp' => $request->no_hp,
+            'alamat' => $request->alamat,
+            'avatar_url' => $request->avatar,
+        ]);
 
-        $user->delete();
+        // 4. Update Password jika diisi
+        if ($request->filled('new_password')) {
+            $user->update([
+                'password' => Hash::make($request->new_password)
+            ]);
+        }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return back()->with('success', 'Profil berhasil diperbarui!');
     }
 }

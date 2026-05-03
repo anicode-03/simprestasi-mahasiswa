@@ -13,15 +13,18 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
+        User::updateOrCreate(
+            ['email' => 'admin@polije.ac.id'],
+            [
             'name' => 'Admin Simprestasi',
             'email' => 'admin@polije.id',
             'password' => Hash::make('AdminSecure123!'),
             'role' => 'admin',
+            'no_hp' => '09894658734',
         ]);
 
         
 
-        $this->command->info('Admin berhasil dibuat!');
+        $this->command->info('AdminSeeder selesai!');
     }
 }

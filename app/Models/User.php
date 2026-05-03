@@ -44,6 +44,8 @@ class User extends Authenticatable
         return $this->hasOne(Mahasiswa::class, 'user_id', 'id');
     }
 
+
+
     public function prestasi()
     {
         return $this->hasManyThrough(
@@ -69,5 +71,25 @@ class User extends Authenticatable
     public function isMahasiswa(): bool
     {
         return $this->role === 'mahasiswa';
+    }
+    // Tambahkan di dalam class User (bisa ditaruh di paling bawah sebelum kurung tutup)
+
+    /**
+     * Mendapatkan inisial dari nama user (Max 2 huruf)
+     */
+    public function getInitialsAttribute(): string
+    {
+        $words = explode(' ', $this->name);
+
+        // Jika nama hanya 1 kata, ambil 2 huruf pertama (misal: "Budi" -> "BU")
+        if (count($words) <= 1) {
+            return strtoupper(substr($this->name, 0, 2));
+        }
+
+        // Jika lebih dari 1 kata, ambil huruf pertama kata pertama dan kedua (misal: "Aris Rahman" -> "AR")
+        $first = substr($words[0], 0, 1);
+        $second = substr($words[1], 0, 1);
+
+        return strtoupper($first . $second);
     }
 }

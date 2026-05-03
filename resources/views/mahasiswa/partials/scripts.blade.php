@@ -3,7 +3,7 @@
     function showSection(id) {
         const headers = {
             dashboard: {
-                title: 'Selamat Datang, <span class="text-blue-700">{{ $user->name }}!</span>',
+                title: 'Selamat Datang, <span class="text-blue-700">{{ auth()->user()->name }}</span>',
                 sub: 'Pantau terus perkembangan prestasimu hari ini.'
             },
             pengajuan: {
@@ -15,30 +15,44 @@
                 sub: 'Kelola informasi diri dan keamanan akun sistem Anda.'
             },
         };
-        if (headers[id]) {
-            document.getElementById('header-title').innerHTML = headers[id].title;
-            document.getElementById('header-subtitle').textContent = headers[id].sub;
+
+        const headerTitle = document.getElementById('header-title');
+        const headerSub = document.getElementById('header-subtitle');
+
+        if (headers[id] && headerTitle && headerSub) {
+            headerTitle.innerHTML = headers[id].title;
+            headerSub.textContent = headers[id].sub;
         }
+
+        // Navigation links update
         document.querySelectorAll('.nav-link').forEach(link => {
-            const active = link.getAttribute('onclick').includes(id);
-            link.classList.toggle('active', active);
-            link.classList.toggle('opacity-70', !active);
-            link.classList.toggle('opacity-100', active);
-            link.setAttribute('aria-current', active ? 'page' : 'false');
+            const isClickTarget = link.getAttribute('onclick')?.includes(id) ||
+                link.dataset.section === id;
+
+            link.classList.toggle('active', isClickTarget);
+            link.classList.toggle('opacity-70', !isClickTarget);
+            link.classList.toggle('opacity-100', isClickTarget);
+            link.setAttribute('aria-current', isClickTarget ? 'page' : 'false');
         });
+
+        // Sections visibility
         ['dashboard', 'pengajuan', 'pengaturan'].forEach(s => {
             const el = document.getElementById(s + '-section');
             if (!el) return;
-            el.classList.add('hidden');
-            el.classList.remove('flex', 'flex-col', 'flex-row', 'gap-10', 'section-transition');
+
+            if (s === id) {
+                el.classList.remove('hidden');
+                el.classList.add('flex', 'section-transition');
+                if (id === 'dashboard') {
+                    el.classList.add('flex-row', 'gap-10');
+                } else {
+                    el.classList.add('flex-col');
+                }
+            } else {
+                el.classList.add('hidden');
+                el.classList.remove('flex', 'flex-col', 'flex-row', 'gap-10', 'section-transition');
+            }
         });
-        const active = document.getElementById(id + '-section');
-        if (active) {
-            active.classList.remove('hidden');
-            active.classList.add('flex', 'section-transition');
-            if (id === 'dashboard') active.classList.add('flex-row', 'gap-10');
-            else active.classList.add('flex-col');
-        }
     }
 
     /* ===== FORM TABS ===== */
@@ -47,24 +61,25 @@
         const histTab = document.getElementById('subtab-history');
         const formBtn = document.getElementById('tab-form-btn');
         const histBtn = document.getElementById('tab-history-btn');
+
         if (tab === 'form') {
             formTab.classList.remove('hidden');
             histTab.classList.add('hidden');
-            formBtn.classList.add('bg-blue-600', 'text-white');
-            formBtn.classList.remove('text-slate-500', 'bg-white', 'text-blue-700', 'shadow-sm');
-            histBtn.classList.remove('bg-blue-600', 'text-white', 'bg-white', 'text-blue-700', 'shadow-sm');
-            histBtn.classList.add('text-slate-500');
-            formBtn.setAttribute('aria-selected', 'true');
-            histBtn.setAttribute('aria-selected', 'false');
+
+            // Kembalikan style tombol aktif ke biru
+            formBtn.className =
+                "tab-btn px-8 py-3 rounded-xl font-bold text-sm transition-all bg-blue-600 text-white flex items-center";
+            histBtn.className =
+                "tab-btn px-8 py-3 rounded-xl font-bold text-sm transition-all text-slate-500 hover:text-slate-700 flex items-center";
         } else {
-            histTab.classList.remove('hidden');
             formTab.classList.add('hidden');
-            histBtn.classList.add('bg-blue-600', 'text-white');
-            histBtn.classList.remove('text-slate-500', 'bg-white', 'text-blue-700', 'shadow-sm');
-            formBtn.classList.remove('bg-blue-600', 'text-white', 'bg-white', 'text-blue-700', 'shadow-sm');
-            formBtn.classList.add('text-slate-500');
-            histBtn.setAttribute('aria-selected', 'true');
-            formBtn.setAttribute('aria-selected', 'false');
+            histTab.classList.remove('hidden');
+
+            // Pindahkan style biru ke tombol riwayat
+            histBtn.className =
+                "tab-btn px-8 py-3 rounded-xl font-bold text-sm transition-all bg-blue-600 text-white flex items-center";
+            formBtn.className =
+                "tab-btn px-8 py-3 rounded-xl font-bold text-sm transition-all text-slate-500 hover:text-slate-700 flex items-center";
         }
     }
 
@@ -77,27 +92,78 @@
     };
 
     function showToast(type, message, title) {
-        const c = document.getElementById('toast-container');
-        const t = document.createElement('div');
-        t.className = `toast toast-${type}`;
-        t.setAttribute('role', 'alert');
-        t.innerHTML =
-            `<div class="toast-icon"><i class="fas ${toastIcons[type]||'fa-info'}"></i></div>
-        <div class="flex-1">${title?`<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.6;margin-bottom:2px;">${title}</div>`:''}
-        <div style="font-size:13px;font-weight:600;">${message}</div></div>
-        <button onclick="dismissToast(this.closest('.toast'))" style="opacity:.4;font-size:12px;padding:2px 6px;" aria-label="Tutup">&times;</button>`;
-        c.appendChild(t);
-        setTimeout(() => dismissToast(t), 4500);
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML =
+            `
+            <div class="toast-icon"><i class="fas ${toastIcons[type] || 'fa-info'}"></i></div>
+            <div class="flex-1">
+                ${title ? `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.6;margin-bottom:2px;">${title}</div>` : ''}
+                <div style="font-size:13px;font-weight:600;">${message}</div>
+            </div>
+            <button class="dismiss-btn" style="opacity:.4;font-size:12px;padding:2px 6px;" aria-label="Tutup">&times;</button>`;
+
+        container.appendChild(toast);
+
+        toast.querySelector('.dismiss-btn').onclick = () => dismissToast(toast);
+        setTimeout(() => dismissToast(toast), 4500);
     }
 
-    function dismissToast(t) {
-        if (!t || t.classList.contains('removing')) return;
-        t.classList.add('removing');
-        t.addEventListener('animationend', () => t.remove(), { once: true });
+    function dismissToast(toast) {
+        if (!toast || toast.classList.contains('removing')) return;
+        toast.classList.add('removing');
+        toast.addEventListener('animationend', () => toast.remove(), {
+            once: true
+        });
     }
 
-    /* ===== FIELD VALIDATION ===== */
+    /* ===== ANIMATIONS ===== */
+    function applyPressAnimation(selector) {
+        document.querySelectorAll(selector).forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.97) translateY(1px)';
+                btn.style.transition = 'transform 0.08s ease';
+            });
+            const reset = () => {
+                btn.style.transform = '';
+                btn.style.transition = 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1)';
+            };
+            btn.addEventListener('mouseup', reset);
+            btn.addEventListener('mouseleave', reset);
+        });
+    }
+
+    function createRipple(e, el) {
+        const existing = el.querySelector('.btn-ripple');
+        if (existing) existing.remove();
+
+        const rect = el.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height) * 2;
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+
+        const ripple = document.createElement('span');
+        ripple.className = 'btn-ripple';
+        ripple.style.cssText = `
+            position:absolute;width:${size}px;height:${size}px;
+            left:${x}px;top:${y}px;border-radius:50%;
+            background:rgba(255,255,255,0.3);pointer-events:none;
+            transform:scale(0);animation:rippleAnim 0.6s ease-out forwards;
+        `;
+
+        if (window.getComputedStyle(el).position === 'static') el.style.position = 'relative';
+        el.style.overflow = 'hidden';
+        el.appendChild(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+    }
+
+    /* ===== VALIDATION ===== */
     function setFieldState(input, valid, errorId, msg) {
+        if (!input) return;
         const errEl = document.getElementById(errorId);
         input.classList.toggle('input-error', !valid);
         input.classList.toggle('input-ok', valid);
@@ -107,230 +173,176 @@
         }
     }
 
-    function validatePengajuanForm() {
-        let ok = true;
-        const n = document.getElementById('nama_kompetisi');
-        const p = document.getElementById('penyelenggara');
-        const t = document.getElementById('tanggal');
-        if (!n.value.trim()) { setFieldState(n, false, 'err-nama'); ok = false; }
-        else setFieldState(n, true, 'err-nama');
-        if (!p.value.trim()) { setFieldState(p, false, 'err-penyelenggara'); ok = false; }
-        else setFieldState(p, true, 'err-penyelenggara');
-        if (!t.value) { setFieldState(t, false, 'err-tanggal'); ok = false; }
-        else setFieldState(t, true, 'err-tanggal');
-        return ok;
+    function updateDeskripsCounter(el) {
+        const counter = document.getElementById('deskripsi-counter');
+        if (!counter) return;
+        counter.textContent = `${el.value.length} / 1000`;
     }
 
-    function validateProfilForm() {
-        let ok = true;
-        const email = document.getElementById('email');
-        const newPw = document.getElementById('new_password');
-        const conf = document.getElementById('confirm_password');
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-            setFieldState(email, false, 'err-email'); ok = false;
-        } else setFieldState(email, true, 'err-email');
-        if (newPw.value && newPw.value !== conf.value) {
-            setFieldState(conf, false, 'err-confirm'); ok = false;
-        } else setFieldState(conf, true, 'err-confirm');
-        return ok;
-    }
-
-    /* Real-time validation */
+    /* ===== DOM READY ===== */
     document.addEventListener('DOMContentLoaded', () => {
-        [{id: 'nama_kompetisi', errId: 'err-nama', check: v => v.trim() !== ''},
-         {id: 'penyelenggara', errId: 'err-penyelenggara', check: v => v.trim() !== ''},
-         {id: 'tanggal', errId: 'err-tanggal', check: v => v !== ''}
-        ].forEach(({id, errId, check}) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.addEventListener('blur', () => setFieldState(el, check(el.value), errId));
-            el.addEventListener('input', () => {
-                if (el.classList.contains('input-error')) setFieldState(el, check(el.value), errId);
+        // 1. Inisialisasi Ripple Style (Tetap seperti semula)
+        if (!document.getElementById('ripple-style')) {
+            const s = document.createElement('style');
+            s.id = 'ripple-style';
+            s.textContent = `@keyframes rippleAnim{to{transform:scale(1);opacity:0}}`;
+            document.head.appendChild(s);
+        }
+
+        // 2. LOGIKA NAVIGASI SECTION (Prioritas Utama)
+        @if (session('last_section'))
+            // Jika baru saja submit, buka section terakhir (misal: pengajuan)
+            showSection("{{ session('last_section') }}");
+        @else
+            // Jika akses biasa, buka dashboard
+            showSection('dashboard');
+        @endif
+
+        // 3. LOGIKA NOTIFIKASI & TAB (Hanya jika sukses)
+        @if (session('success'))
+            showToast('success', '{{ session('success') }}', 'Berhasil');
+
+            // Cek jika section aktif adalah pengajuan, maka otomatis buka tab riwayat
+            @if (session('last_section') == 'pengajuan')
+                switchFormTab('history');
+            @endif
+        @endif
+
+        // Form Submit Listeners
+        const pengajuanForm = document.getElementById('pengajuan-form');
+        if (pengajuanForm) {
+            pengajuanForm.addEventListener('submit', function(e) {
+                let isValid = true;
+                const req = {
+                    nama: 'nama_kompetisi',
+                    peny: 'penyelenggara',
+                    tgl: 'tanggal'
+                };
+
+                Object.entries(req).forEach(([key, id]) => {
+                    const el = document.getElementById(id);
+                    if (!el?.value.trim()) {
+                        setFieldState(el, false, 'err-' + (id.split('_')[0]));
+                        isValid = false;
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    showToast('error', 'Mohon lengkapi semua kolom wajib.', 'Validasi');
+                } else {
+                    const btn = document.getElementById('submit-btn');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.querySelector('#submit-spinner')?.classList.remove('hidden');
+                        btn.querySelector('#submit-icon')?.classList.add('hidden');
+                        const label = btn.querySelector('#submit-label');
+                        if (label) label.textContent = 'Mengirim...';
+                    }
+                }
             });
-        });
-        const emailEl = document.getElementById('email');
-        if (emailEl) emailEl.addEventListener('blur', () => setFieldState(emailEl, /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value), 'err-email'));
-        const conf = document.getElementById('confirm_password');
-        const newPw = document.getElementById('new_password');
-        if (conf && newPw) conf.addEventListener('input', () => {
-            if (newPw.value && conf.value) setFieldState(conf, newPw.value === conf.value, 'err-confirm');
-        });
+        }
+
+        // Deskripsi Counter
+        const deskripsi = document.getElementById('deskripsi');
+        if (deskripsi) {
+            deskripsi.addEventListener('input', function() {
+                const counter = document.getElementById('deskripsi-counter');
+                if (!counter) return;
+                const len = this.value.length;
+                const max = this.maxLength || 1000;
+                counter.textContent = `${len} / ${max}`;
+                counter.className = 'text-xs font-medium ' +
+                    (len > max * 0.9 ? 'text-red-500' : (len > max * 0.7 ? 'text-amber-500' :
+                        'text-slate-400'));
+            });
+        }
+
+        // Setup UI Enhancements
         setupDragDrop('zone-cert', 'file-cert', 'label-cert');
         setupDragDrop('zone-photo', 'file-photo', 'label-photo');
+        applyPressAnimation('button, a.btn, [role="button"]');
+
+        document.querySelectorAll('#submit-btn, #profil-submit-btn, .tab-btn').forEach(el => {
+            el.addEventListener('mousedown', e => createRipple(e, el));
+        });
+
+        // Auto buka tab riwayat jika ada session success (setelah form submit)
+        @if (session('success'))
+            switchFormTab('history');
+            showToast('success', '{{ session('success') }}', 'Berhasil');
+        @endif
     });
-
-    /* ===== FORM SUBMITS ===== */
-    document.getElementById('pengajuan-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (!validatePengajuanForm()) {
-            showToast('error', 'Mohon lengkapi semua kolom yang wajib diisi.', 'Validasi');
-            return;
-        }
-        const btn = document.getElementById('submit-btn');
-        const sp = document.getElementById('submit-spinner');
-        const ic = document.getElementById('submit-icon');
-        const lb = document.getElementById('submit-label');
-        btn.disabled = true;
-        sp.style.display = 'block';
-        ic.style.display = 'none';
-        lb.textContent = 'Mengirim...';
-        setTimeout(() => {
-            btn.disabled = false;
-            sp.style.display = 'none';
-            ic.style.display = '';
-            lb.textContent = 'Kirim Pengajuan Prestasi';
-            showToast('success', 'Pengajuan berhasil dikirim dan sedang menunggu verifikasi.', 'Berhasil');
-        }, 1800);
-    });
-
-    document.getElementById('profil-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (!validateProfilForm()) {
-            showToast('error', 'Periksa kembali data yang dimasukkan.', 'Validasi');
-            return;
-        }
-        const btn = document.getElementById('profil-submit-btn');
-        const sp = document.getElementById('profil-spinner');
-        const ic = document.getElementById('profil-icon');
-        const lb = document.getElementById('profil-label');
-        btn.disabled = true;
-        sp.style.display = 'block';
-        ic.style.display = 'none';
-        lb.textContent = 'Menyimpan...';
-        setTimeout(() => {
-            btn.disabled = false;
-            sp.style.display = 'none';
-            ic.style.display = '';
-            lb.textContent = 'Simpan Perubahan';
-            showToast('success', 'Profil berhasil diperbarui.', 'Tersimpan');
-        }, 1500);
-    });
-
-    /* ===== CONFIRM RESET ===== */
-    function confirmReset() {
-        const modal = document.getElementById('confirm-modal');
-        modal.classList.add('open');
-        const close = () => modal.classList.remove('open');
-        document.getElementById('confirm-cancel').onclick = close;
-        document.getElementById('confirm-ok').onclick = () => {
-            document.getElementById('pengajuan-form').reset();
-            document.getElementById('label-cert').innerHTML = defaultUploadHTML('fa-file-pdf', 'Upload Sertifikat', '(Format PDF - Multiple)', 'Pilih File', 'text-blue-500');
-            document.getElementById('label-photo').innerHTML = defaultUploadHTML('fa-image', 'Upload Dokumentasi', '(Format Gambar - Multiple)', 'Pilih Foto', 'text-indigo-500');
-            ['nama_kompetisi', 'penyelenggara', 'tanggal'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.remove('input-error', 'input-ok');
-            });
-            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('visible'));
-            close();
-            showToast('info', 'Formulir telah direset.', 'Reset');
-        };
-        modal.onclick = e => { if (e.target === modal) close(); };
-    }
-
-    function defaultUploadHTML(icon, title, sub, btn, iconColor) {
-        return `<div class="w-16 h-16 bg-white border border-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas ${icon} text-3xl ${iconColor}"></i></div>
-        <p class="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-1">${title}</p>
-        <p class="text-[10px] text-slate-400 font-medium mb-4 italic">${sub}</p>
-        <span class="inline-block px-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600">${btn}</span>`;
-    }
 
     /* ===== FILE UPLOAD ===== */
     function updateFileName(input, targetId) {
         const target = document.getElementById(targetId);
-        if (!input.files || !input.files.length) return;
-        const display = input.files.length === 1 ? input.files[0].name : `${input.files.length} file terpilih`;
+        if (!input.files?.length || !target) return;
+
+        const count = input.files.length;
+        const display = count === 1 ? input.files[0].name : `${count} file terpilih`;
+
         target.innerHTML =
-            `<i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
-        <p class="text-sm font-bold text-slate-700">${display}</p>
-        <span class="mt-2 text-[10px] text-blue-500 font-bold uppercase tracking-tighter cursor-pointer">Ganti Semua</span>`;
-        showToast('success', `${display} siap diunggah.`, 'File Dipilih');
+            `
+            <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
+            <p class="text-sm font-bold text-slate-700">${display}</p>
+            <span class="mt-2 text-[10px] text-blue-500 font-bold uppercase tracking-tighter cursor-pointer">Ganti Semua</span>`;
+
+        showToast('success', `${display} siap diunggah.`, 'File Berhasil');
     }
 
     function setupDragDrop(zoneId, inputId, labelId) {
         const zone = document.getElementById(zoneId);
         const input = document.getElementById(inputId);
         if (!zone || !input) return;
-        ['dragenter', 'dragover'].forEach(evt => zone.addEventListener(evt, e => {
-            e.preventDefault();
-            zone.classList.add('dragover');
-        }));
-        ['dragleave', 'dragend', 'drop'].forEach(evt => zone.addEventListener(evt, e => {
-            e.preventDefault();
-            zone.classList.remove('dragover');
-            if (evt === 'drop' && e.dataTransfer?.files?.length) {
-                input.files = e.dataTransfer.files;
-                updateFileName(input, labelId);
-            }
-        }));
+
+        ['dragenter', 'dragover'].forEach(evt => {
+            zone.addEventListener(evt, e => {
+                e.preventDefault();
+                zone.classList.add('border-blue-400', 'bg-blue-50');
+            });
+        });
+
+        ['dragleave', 'dragend', 'drop'].forEach(evt => {
+            zone.addEventListener(evt, e => {
+                e.preventDefault();
+                zone.classList.remove('border-blue-400', 'bg-blue-50');
+                if (evt === 'drop' && e.dataTransfer?.files?.length) {
+                    input.files = e.dataTransfer.files;
+                    updateFileName(input, labelId);
+                }
+            });
+        });
     }
 
-    /* ===== PASSWORD STRENGTH ===== */
-    function updatePasswordStrength(val) {
-        const bar = document.getElementById('pw-strength-bar');
-        const label = document.getElementById('pw-strength-label');
-        if (!bar || !label) return;
-        if (!val) { bar.style.width = '0%'; label.textContent = ''; return; }
-        let score = 0;
-        if (val.length >= 8) score++;
-        if (/[A-Z]/.test(val)) score++;
-        if (/[0-9]/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-        const levels = [
-            {pct: '25%', color: '#ef4444', text: 'Sangat lemah'},
-            {pct: '50%', color: '#f59e0b', text: 'Lemah'},
-            {pct: '75%', color: '#3b82f6', text: 'Cukup kuat'},
-            {pct: '100%', color: '#22c55e', text: 'Sangat kuat'},
-        ];
-        const lvl = levels[Math.max(0, score - 1)];
-        bar.style.width = lvl.pct;
-        bar.style.background = lvl.color;
-        label.textContent = lvl.text;
-        label.style.color = lvl.color;
+    /* ===== AVATAR ===== */
+    function selectAvatar(url, element) {
+        // Update preview foto
+        const img = document.getElementById('current-avatar');
+        if (img) img.src = url;
+
+        // Isi input hidden yang ADA DI DALAM FORM (bukan di modal)
+        const input = document.getElementById('avatar-input-hidden');
+        if (input) input.value = url;
+
+        // Highlight avatar yang dipilih
+        document.querySelectorAll('.avatar-btn').forEach(b =>
+            b.classList.remove('avatar-btn-selected', 'ring-4', 'ring-blue-500')
+        );
+        if (element) element.classList.add('avatar-btn-selected', 'ring-4', 'ring-blue-500');
+
+        toggleAvatarModal();
+        showToast('info', 'Foto profil dipilih. Jangan lupa simpan perubahan.', 'Avatar');
     }
 
-    /* ===== AVATAR MODAL ===== */
     function toggleAvatarModal() {
         const modal = document.getElementById('avatar-modal');
-        modal.classList.toggle('hidden');
+        if (modal) modal.classList.toggle('hidden');
     }
 
-    function selectAvatar(url) {
-        document.getElementById('current-avatar').src = url;
-        document.getElementById('selected-avatar-input').value = url;
-        document.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('avatar-btn-selected'));
-        event.currentTarget.classList.add('avatar-btn-selected');
-        toggleAvatarModal();
-        showToast('success', 'Foto profil berhasil diubah. Simpan perubahan untuk menyimpan.', 'Avatar Diubah');
-    }
-
-    document.getElementById('avatar-modal').addEventListener('click', function(e) {
-        if (e.target === this) toggleAvatarModal();
-    });
-
-    /* ===== LOGOUT ===== */
-    function confirmLogout(e) {
-        if (!confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
-            e?.preventDefault();
-            return false;
-        }
-        return true;
-    }
-
-    /* ===== KEYBOARD NAV ===== */
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('keydown', e => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                link.click();
-            }
-        });
-    });
-
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-            document.getElementById('confirm-modal').classList.remove('open');
-            const am = document.getElementById('avatar-modal');
-            if (!am.classList.contains('hidden')) toggleAvatarModal();
-        }
-    });
+    // Modal Close on Backdrop
+    window.onclick = function(event) {
+        const modal = document.getElementById('avatar-modal');
+        if (event.target === modal) toggleAvatarModal();
+    };
 </script>

@@ -2,43 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function update(Request $request): RedirectResponse
+    public function edit()
     {
-        $user = auth()->user();
-        
-        // 1. Validasi
+        // Jika akses langsung ke /mahasiswa/profile
+        return redirect()->route('mahasiswa.dashboard');
+    }
+
+    public function update(Request $request)
+    {
+        $user = Auth::user();
+
         $request->validate([
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'no_hp' => 'nullable|string|max:15',
-            'alamat' => 'nullable|string',
-            'avatar' => 'nullable|string', // avatar_url di migration Anda
-            'new_password' => ['nullable', 'confirmed', Password::defaults()],
+            'email'        => 'required|email|unique:users,email,' . $user->id,
+            'no_hp'        => 'nullable|string|max:20',
+            'alamat'       => 'nullable|string|max:500',
+            'avatar'       => 'nullable|string',
+            'new_password' => 'nullable|min:8|confirmed',
         ]);
 
-        // 2. Update Tabel Users (Email)
-        $user->update([
-            'email' => $request->email,
-        ]);
+        // Update email di tabel users
+        $user->update(['email' => $request->email]);
 
-        // 3. Update Tabel Mahasiswas (no_hp, alamat, avatar_url)
-        // Kita gunakan updateOrCreate untuk jaga-jaga jika data di tabel mahasiswa belum ada
-        $user->mahasiswa()->update([
-            'no_hp' => $request->no_hp,
-            'alamat' => $request->alamat,
-            'avatar_url' => $request->avatar,
-        ]);
-
-        // 4. Update Password jika diisi
+        // Update password jika diisi
         if ($request->filled('new_password')) {
-            $user->update([
-                'password' => Hash::make($request->new_password)
+            $user->update(['password' => bcrypt($request->new_password)]);
+        }
+
+        // Update data mahasiswa
+        if ($user->mahasiswa) {
+            $avatarUrl = $request->avatar
+                ? $request->avatar
+                : $user->mahasiswa->avatar_url;
+
+            $user->mahasiswa->update([
+                'no_hp'      => $request->no_hp,
+                'alamat'     => $request->alamat,
+                'avatar_url' => $avatarUrl,
             ]);
         }
 

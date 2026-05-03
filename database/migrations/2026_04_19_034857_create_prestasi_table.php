@@ -15,17 +15,24 @@ return new class extends Migration
         Schema::create('prestasi', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('mahasiswa_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('kategori_id')->constrained();
-            $table->foreignId('tingkat_id')->constrained();
+            // Relasi
+            $table->foreignId('mahasiswa_id')->constrained('mahasiswas')->cascadeOnDelete();
+            $table->foreignId('kategori_id')->constrained('kategoris');
+            $table->foreignId('tingkat_id')->constrained('tingkats');
             $table->foreignId('capaian_id')->constrained('capaians');
 
+            // Detail Kompetisi (Sesuai Form)
             $table->string('nama_kompetisi');
             $table->string('penyelenggara');
+            $table->string('dosen_pembimbing')->nullable(); // Tambahan
+            $table->string('lokasi')->nullable();           // Tambahan
+            $table->date('tanggal_pelaksanaan')->nullable(); // Tambahan
+            $table->string('link_pendukung')->nullable();   // Tambahan
+            $table->text('deskripsi')->nullable();
 
+            // Status & Verifikasi
             $table->enum('status', ['pending', 'disetujui', 'ditolak', 'revisi'])->default('pending');
             $table->text('catatan_admin')->nullable();
-
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
 

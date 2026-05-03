@@ -2,14 +2,14 @@
     <div class="p-8">
         <div class="flex items-center -ml-5 -mt-8">
             <div class="p-2 rounded-xl -ml-1">
-                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-graduation-cap text-white text-sm"></i>
+                <div class="w-10 h-10 flex items-center justify-center">
+                    <img src="{{ asset('assets/img/logo.png') }}" class="w-10 h-10 object-contain" alt="Polije Logo">
                 </div>
             </div>
             <div class="ml-1">
                 <h1 class="font-extrabold text-sm tracking-tight leading-none text-white">SIMPRESMA</h1>
-                <p class="text-[10px] text-blue-200 font-medium tracking-widest uppercase mt-1">Politeknik Negeri
-                    Jember</p>
+                <p class="text-[10px] text-blue-200 font-medium tracking-widest uppercase mt-1">Politeknik Negeri Jember
+                </p>
             </div>
         </div>
     </div>

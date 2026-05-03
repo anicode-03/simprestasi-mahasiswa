@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kategori;
+use App\Models\Tingkat;
+use App\Models\Capaian;
+use App\Models\Prestasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,11 +18,12 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->isAdmin()) {
+        // Menggunakan role dari field 'role' atau method helper
+        if ($user->role === 'admin' || (method_exists($user, 'isAdmin') && $user->isAdmin())) {
             return $this->adminDashboard();
         }
 
-        if ($user->isMahasiswa()) {
+        if ($user->role === 'mahasiswa' || (method_exists($user, 'isMahasiswa') && $user->isMahasiswa())) {
             return $this->mahasiswaDashboard();
         }
 
@@ -30,6 +35,7 @@ class DashboardController extends Controller
      */
     private function adminDashboard()
     {
+        // Anda bisa menambahkan count data untuk statistik admin di sini
         return view('admin.dashboard');
     }
 
@@ -40,14 +46,20 @@ class DashboardController extends Controller
     {
         $user = Auth::user()->load('mahasiswa');
 
-        // Ambil 3 prestasi terakhir milik mahasiswa
-        $prestasis = $user->prestasi()
-            ->with(['kategori', 'tingkat', 'capaian'])
-            ->latest()
-            ->take(3)
-            ->get();
+        // 1. AMBIL DATA MASTER (WAJIB ADA agar form tidak error 'Undefined variable')
+        $kategori = Kategori::all();
+        $tingkat = Tingkat::all();
+        $capaian = Capaian::all();
 
-        return view('mahasiswa.dashboard', compact('user', 'prestasis'));
+        // 2. Ambil prestasi milik mahasiswa (eager loading untuk performa)
+        // Di dalam mahasiswaDashboard()
+        $prestasi = Prestasi::with(['kategori', 'tingkat', 'capaian'])
+            ->where('mahasiswa_id', $user->mahasiswa->id)
+            ->latest()
+            ->paginate(10); // Pakai paginate, angka 10 artinya 10 data per halaman
+
+        // 3. Kirim ke view (Pastikan variabel $kategori dikirim ke view)
+        return view('mahasiswa.dashboard', compact('user', 'prestasi', 'kategori', 'tingkat', 'capaian'));
     }
 
     /**
@@ -65,19 +77,16 @@ class DashboardController extends Controller
             'new_password' => 'nullable|min:8|confirmed',
         ]);
 
-        // update user
         $user->update([
             'email' => $request->email,
         ]);
 
-        // update password jika diisi
         if ($request->filled('new_password')) {
             $user->update([
                 'password' => bcrypt($request->new_password)
             ]);
         }
 
-        // update mahasiswa (aman dari null)
         if ($user->mahasiswa) {
             $user->mahasiswa->update([
                 'no_hp'      => $request->no_hp,

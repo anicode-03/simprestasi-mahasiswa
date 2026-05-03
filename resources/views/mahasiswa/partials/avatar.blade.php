@@ -11,31 +11,30 @@
             </button>
         </div>
         <div class="p-8 grid grid-cols-3 gap-4">
-            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Felix')"
+            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Erix&mood[]=happy&mood[]=smile')"
                 class="avatar-btn aspect-square rounded-3xl overflow-hidden bg-slate-50 border-2 border-slate-200 hover:border-blue-500 transition-all focus:outline-none"
-                aria-label="Avatar Felix"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                aria-label="Avatar Felix"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Erix&mood[]=happy&mood[]=smile"
                     class="w-full h-full p-2" alt="Avatar Felix"></button>
-            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Ani')"
+            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Ani&mood[]=happy&mood[]=smile')"
                 class="avatar-btn aspect-square rounded-3xl overflow-hidden bg-slate-50 border-2 border-slate-200 hover:border-blue-500 transition-all focus:outline-none"
-                aria-label="Avatar Ani"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ani"
+                aria-label="Avatar Ani"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ani&mood[]=happy&mood[]=smile"
                     class="w-full h-full p-2" alt="Avatar Ani"></button>
-            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka')"
+            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Riri&mood[]=happy&mood[]=smile')"
                 class="avatar-btn aspect-square rounded-3xl overflow-hidden bg-slate-50 border-2 border-slate-200 hover:border-blue-500 transition-all focus:outline-none"
-                aria-label="Avatar Aneka"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka"
+                aria-label="Avatar Aneka"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Riri&mood[]=happy&mood[]=smile"
                     class="w-full h-full p-2" alt="Avatar Aneka"></button>
-            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Budi')"
+            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Falih&mood[]=happy&mood[]=smile')"
                 class="avatar-btn aspect-square rounded-3xl overflow-hidden bg-slate-50 border-2 border-slate-200 hover:border-blue-500 transition-all focus:outline-none"
-                aria-label="Avatar Budi"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Budi"
+                aria-label="Avatar Budi"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Falih&mood[]=happy&mood[]=smile"
                     class="w-full h-full p-2" alt="Avatar Budi"></button>
-            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Sari')"
+            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Rafi&mood[]=happy&mood[]=smile')"
                 class="avatar-btn aspect-square rounded-3xl overflow-hidden bg-slate-50 border-2 border-slate-200 hover:border-blue-500 transition-all focus:outline-none"
-                aria-label="Avatar Sari"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sari"
+                aria-label="Avatar Sari"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Rafi&mood[]=happy&mood[]=smile"
                     class="w-full h-full p-2" alt="Avatar Sari"></button>
-            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Doni')"
+            <button onclick="selectAvatar('https://api.dicebear.com/7.x/avataaars/svg?seed=Septa&mood[]=happy&mood[]=smile')"
                 class="avatar-btn aspect-square rounded-3xl overflow-hidden bg-slate-50 border-2 border-slate-200 hover:border-blue-500 transition-all focus:outline-none"
-                aria-label="Avatar Doni"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Doni"
+                aria-label="Avatar Doni"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Septa&mood[]=happy&mood[]=smile"
                     class="w-full h-full p-2" alt="Avatar Doni"></button>
         </div>
-        <input type="hidden" name="selected_avatar_url" id="selected-avatar-input" value="">
     </div>
 </div>

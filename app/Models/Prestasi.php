@@ -2,18 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\Capaian;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Prestasi extends Model
 {
-    use HasFactory;
-
     protected $table = 'prestasi';
-
     protected $fillable = [
         'mahasiswa_id',
         'kategori_id',
@@ -21,47 +14,50 @@ class Prestasi extends Model
         'capaian_id',
         'nama_kompetisi',
         'penyelenggara',
+        'dosen_pembimbing',
         'lokasi',
         'tanggal_pelaksanaan',
+        'link_pendukung',
+        'deskripsi',          // pastikan ini ada
         'status',
         'catatan_admin',
         'verified_by',
         'verified_at',
     ];
 
-    // 🔸 Relasi ke mahasiswa
-    public function mahasiswa(): BelongsTo
+    protected $casts = [
+        'tanggal_pelaksanaan' => 'date',
+        'verified_at'         => 'datetime',
+    ];
+
+    // ─── RELASI ───
+    public function mahasiswa()
     {
-        return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id', 'id');
+        return $this->belongsTo(Mahasiswa::class);
     }
 
-    // 🔸 Relasi ke kategori
-    public function kategori(): BelongsTo
+    public function kategori()
     {
-        return $this->belongsTo(Kategori::class, 'kategori_id', 'id');
+        return $this->belongsTo(Kategori::class);
     }
 
-    // 🔸 Relasi ke tingkat
-    public function tingkat(): BelongsTo
+    public function tingkat()
     {
-        return $this->belongsTo(Tingkat::class, 'tingkat_id', 'id');
+        return $this->belongsTo(Tingkat::class);
     }
 
-    // 🔸 Relasi ke capaian
-    public function capaian(): BelongsTo
+    public function capaian()
     {
-        return $this->belongsTo(Capaian::class, 'capaian_id', 'id');
+        return $this->belongsTo(Capaian::class);
     }
 
-    // 🔸 Relasi ke admin (verifikator)
-    public function verifier(): BelongsTo
+    public function buktis()
     {
-        return $this->belongsTo(User::class, 'verified_by', 'id');
+        return $this->hasMany(BuktiPrestasi::class);
     }
 
-    // 🔸 Relasi ke bukti prestasi
-    public function bukti(): HasMany
+    public function verifier()
     {
-        return $this->hasMany(BuktiPrestasi::class, 'prestasi_id', 'id');
+        return $this->belongsTo(User::class, 'verified_by');
     }
 }

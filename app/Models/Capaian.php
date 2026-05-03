@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Capaian extends Model
 {
-    protected $table = 'capaian';
+    protected $table = 'capaians';
 
     protected $fillable = [
         'nama_capaian',

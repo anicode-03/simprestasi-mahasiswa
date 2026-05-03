@@ -13,263 +13,162 @@ use Illuminate\Support\Facades\Storage;
 
 class PrestasiController extends Controller
 {
-    /**
-     * Tampilkan daftar prestasi
-     */
     public function index()
     {
-        $user = Auth::user();
+        $user     = Auth::user();
+        $kategori = Kategori::all();
+        $tingkat  = Tingkat::all();
+        $capaian  = Capaian::all();
 
         $query = Prestasi::with([
             'mahasiswa.user',
             'kategori',
             'tingkat',
             'capaian',
-            'verifier'
+            'verifier',
         ])->latest();
 
-        // mahasiswa hanya lihat miliknya
-        if ($user->isMahasiswa()) {
+        if ($user->role === 'mahasiswa') {
             $query->where('mahasiswa_id', $user->mahasiswa->id);
         }
 
         $prestasi = $query->paginate(10);
 
-        return view('prestasi.index', compact('prestasi'));
+        return view('mahasiswa.dashboard', compact('prestasi', 'kategori', 'tingkat', 'capaian'));
     }
 
-    /**
-     * Form tambah
-     */
-    public function create()
-    {
-        return view('prestasi.create', [
-            'kategori' => Kategori::all(),
-            'tingkat'  => Tingkat::all(),
-            'capaian'  => Capaian::all(),
-        ]);
-    }
-
-    /**
-     * Simpan data
-     */
     public function store(Request $request)
     {
         $user = Auth::user();
 
         $request->validate([
-            'kategori_id' => 'required|exists:kategori,id',
-            'tingkat_id'  => 'required|exists:tingkat,id',
-            'capaian_id'  => 'required|exists:capaian,id',
-            'nama_kompetisi' => 'required|string|max:255',
-            'penyelenggara' => 'required|string|max:255',
-            'lokasi' => 'required|string|max:255',
-            'tanggal_pelaksanaan' => 'required|date',
-            'deskripsi' => 'nullable|string',
-            'bukti.*' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048'
+            'nama_kompetisi'    => 'required|string|max:255',
+            'penyelenggara'     => 'required|string|max:255',
+            'kategori_id'       => 'required|exists:kategoris,id',
+            'tingkat_id'        => 'required|exists:tingkats,id',
+            'capaian_id'        => 'required|exists:capaians,id',
+            'tanggal'           => 'required|date',
+            'dosen'             => 'nullable|string|max:255',
+            'lokasi'            => 'nullable|string|max:255',
+            'link_pendukung'    => 'nullable|url|max:255',
+            'deskripsi'         => 'nullable|string|max:1000',
+            'file_sertifikat.*' => 'nullable|file|mimes:pdf|max:5120',
+            'file_foto.*'       => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
-        // simpan prestasi
         $prestasi = Prestasi::create([
-            'mahasiswa_id' => $user->mahasiswa->id,
-            'kategori_id'  => $request->kategori_id,
-            'tingkat_id'   => $request->tingkat_id,
-            'capaian_id'   => $request->capaian_id,
-            'nama_kompetisi' => $request->nama_kompetisi,
-            'penyelenggara'  => $request->penyelenggara,
-            'lokasi'         => $request->lokasi,
-            'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
-            'deskripsi' => $request->deskripsi,
-            'status' => 'pending',
+            'mahasiswa_id'        => $user->mahasiswa->id,
+            'kategori_id'         => $request->kategori_id,
+            'tingkat_id'          => $request->tingkat_id,
+            'capaian_id'          => $request->capaian_id,
+            'nama_kompetisi'      => $request->nama_kompetisi,
+            'penyelenggara'       => $request->penyelenggara,
+            'dosen_pembimbing'    => $request->dosen,
+            'lokasi'              => $request->lokasi,
+            'tanggal_pelaksanaan' => $request->tanggal,
+            'link_pendukung'      => $request->link_pendukung,
+            'deskripsi'           => $request->deskripsi,
+            'status'              => 'pending',
         ]);
 
-        // upload bukti (bisa banyak file)
-        if ($request->hasFile('bukti')) {
-            foreach ($request->file('bukti') as $file) {
-                $path = $file->store('bukti', 'public');
-
+        if ($request->hasFile('file_sertifikat')) {
+            foreach ($request->file('file_sertifikat') as $file) {
+                $path = $file->store('bukti/sertifikat', 'public');
                 BuktiPrestasi::create([
                     'prestasi_id' => $prestasi->id,
                     'file_path'   => $path,
-                    'tipe_file'   => $file->getClientOriginalExtension(),
+                    'tipe_file'   => 'sertifikat',
                 ]);
             }
         }
 
-        return redirect()->route('prestasi.index')
-            ->with('success', 'Prestasi berhasil diajukan!');
+        if ($request->hasFile('file_foto')) {
+            foreach ($request->file('file_foto') as $file) {
+                $path = $file->store('bukti/foto', 'public');
+                BuktiPrestasi::create([
+                    'prestasi_id' => $prestasi->id,
+                    'file_path'   => $path,
+                    'tipe_file'   => 'foto',
+                ]);
+            }
+        }
+
+        return redirect()->back()->with([
+            'success' => 'Prestasi berhasil diajukan!',
+            'last_section' => 'pengajuan' // Tambahkan penanda ini
+        ]);
     }
 
-    /**
-     * Detail
-     */
-    public function show(Prestasi $prestasi)
+    public function show(int $id)
     {
-        $this->authorizeOwner($prestasi);
-
-        $prestasi->load([
+        $prestasi = Prestasi::with([
             'mahasiswa.user',
             'kategori',
             'tingkat',
             'capaian',
-            'bukti',
-            'verifier'
-        ]);
+            'buktis',           // relasi ke tabel bukti_prestasi
+            'verifier',
+        ])->findOrFail($id);
 
-        return view('prestasi.show', compact('prestasi'));
-    }
-
-    /**
-     * Form edit
-     */
-    public function edit(Prestasi $prestasi)
-    {
         $this->authorizeOwner($prestasi);
 
-        return view('prestasi.edit', [
-            'prestasi' => $prestasi,
-            'kategori' => Kategori::all(),
-            'tingkat'  => Tingkat::all(),
-            'capaian'  => Capaian::all(),
-        ]);
+        return view('mahasiswa.prestasi.show', compact('prestasi'));
     }
 
-    /**
-     * Update data
-     */
-    public function update(Request $request, Prestasi $prestasi)
-    {
-        $this->authorizeOwner($prestasi);
-
-        $request->validate([
-            'kategori_id' => 'required|exists:kategori,id',
-            'tingkat_id'  => 'required|exists:tingkat,id',
-            'capaian_id'  => 'required|exists:capaian,id',
-            'nama_kompetisi' => 'required|string|max:255',
-            'penyelenggara' => 'required|string|max:255',
-            'lokasi' => 'required|string|max:255',
-            'tanggal_pelaksanaan' => 'required|date',
-            'deskripsi' => 'nullable|string',
-            'bukti.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048'
-        ]);
-
-        $prestasi->update([
-            'kategori_id' => $request->kategori_id,
-            'tingkat_id'  => $request->tingkat_id,
-            'capaian_id'  => $request->capaian_id,
-            'nama_kompetisi' => $request->nama_kompetisi,
-            'penyelenggara'  => $request->penyelenggara,
-            'lokasi'         => $request->lokasi,
-            'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
-            'deskripsi' => $request->deskripsi,
-            'status' => 'pending', // reset
-            'verified_by' => null,
-            'verified_at' => null
-        ]);
-
-        // upload ulang file
-        if ($request->hasFile('bukti')) {
-            foreach ($prestasi->bukti as $bukti) {
-                Storage::disk('public')->delete($bukti->file_path);
-                $bukti->delete();
-            }
-
-            foreach ($request->file('bukti') as $file) {
-                $path = $file->store('bukti', 'public');
-
-                BuktiPrestasi::create([
-                    'prestasi_id' => $prestasi->id,
-                    'file_path'   => $path,
-                    'tipe_file'   => $file->getClientOriginalExtension(),
-                ]);
-            }
-        }
-
-        return redirect()->route('prestasi.index')
-            ->with('success', 'Prestasi berhasil diperbarui');
-    }
-
-    /**
-     * Hapus
-     */
-    public function destroy(Prestasi $prestasi)
-    {
-        $this->authorizeOwner($prestasi);
-
-        foreach ($prestasi->bukti as $bukti) {
-            Storage::disk('public')->delete($bukti->file_path);
-        }
-
-        $prestasi->delete();
-
-        return redirect()->route('prestasi.index')
-            ->with('success', 'Prestasi berhasil dihapus');
-    }
-
-    /**
-     * Approve admin
-     */
-    public function approve($id)
+    public function approve(int $id)
     {
         $prestasi = Prestasi::findOrFail($id);
 
         $prestasi->update([
-            'status' => 'disetujui',
+            'status'      => 'disetujui',
             'verified_by' => Auth::id(),
-            'verified_at' => now()
+            'verified_at' => now(),
         ]);
 
-        return back()->with('success', 'Prestasi disetujui');
+        return back()->with('success', 'Prestasi disetujui.');
     }
 
-    /**
-     * Reject admin
-     */
-    public function reject(Request $request, $id)
+    public function reject(Request $request, int $id)
     {
         $request->validate([
-            'catatan_admin' => 'required|string|max:500'
+            'catatan_admin' => 'required|string|max:500',
         ]);
 
         $prestasi = Prestasi::findOrFail($id);
 
         $prestasi->update([
-            'status' => 'ditolak',
+            'status'        => 'ditolak',
             'catatan_admin' => $request->catatan_admin,
-            'verified_by' => Auth::id(),
-            'verified_at' => now()
+            'verified_by'   => Auth::id(),
+            'verified_at'   => now(),
         ]);
 
-        return back()->with('success', 'Prestasi ditolak');
+        return back()->with('success', 'Prestasi ditolak.');
     }
 
-    public function revisi(Request $request, $id)
+    public function revisi(Request $request, int $id)
     {
+        $request->validate([
+            'catatan_admin' => 'required|string|max:500',
+        ]);
+
         $prestasi = Prestasi::findOrFail($id);
 
-        $request->validate([
-            'catatan_admin' => 'required|string'
-        ]);
-
         $prestasi->update([
-            'status' => 'revisi',
+            'status'        => 'revisi',
             'catatan_admin' => $request->catatan_admin,
-            'verified_by' => Auth::id(),
-            'verified_at' => now()
+            'verified_by'   => Auth::id(),
+            'verified_at'   => now(),
         ]);
 
-        return back()->with('success', 'Prestasi diminta revisi');
+        return back()->with('success', 'Prestasi dikembalikan untuk revisi.');
     }
 
-    /**
-     * Cek kepemilikan data
-     */
     private function authorizeOwner(Prestasi $prestasi)
     {
         $user = Auth::user();
-
-        if ($user->isMahasiswa() && $prestasi->mahasiswa_id !== $user->mahasiswa->id) {
-            abort(403, 'Tidak punya akses');
+        if ($user->role === 'mahasiswa' && $prestasi->mahasiswa_id !== $user->mahasiswa->id) {
+            abort(403, 'Anda tidak memiliki akses ke data ini.');
         }
     }
 }
